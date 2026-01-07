@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -84,12 +85,29 @@ class _HomeDashboardState extends State<HomeDashboard>
 
     _fabAnimationController.forward();
     _checkHealthPermissions();
+    _loadSteps();
   }
 
   @override
   void dispose() {
     _fabAnimationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSteps() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _currentSteps = prefs.getInt('currentSteps') ?? 7842;
+      _energyPoints = _currentSteps ~/ 100;
+      _distance = _currentSteps * 0.0005;
+      _calories = (_currentSteps * 0.04).round();
+      _activeTime = (_currentSteps * 0.01).round();
+    });
+  }
+
+  Future<void> _saveSteps() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('currentSteps', _currentSteps);
   }
 
   void _checkHealthPermissions() {
@@ -278,6 +296,8 @@ class _HomeDashboardState extends State<HomeDashboard>
         _activeTime = (_currentSteps * 0.01).round();
       });
 
+      await _saveSteps();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Health data synced successfully!'),
@@ -397,7 +417,7 @@ class _HomeDashboardState extends State<HomeDashboard>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => StepEntryModalWidget(
-        onStepsAdded: (steps) {
+        onStepsAdded: (steps) async {
           setState(() {
             _currentSteps += steps;
             _energyPoints = _currentSteps ~/ 100;
@@ -405,6 +425,7 @@ class _HomeDashboardState extends State<HomeDashboard>
             _calories = (_currentSteps * 0.04).round();
             _activeTime = (_currentSteps * 0.01).round();
           });
+          await _saveSteps();
         },
       ),
     );

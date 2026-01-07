@@ -6,7 +6,7 @@ import '../../../core/app_export.dart';
 import '../../../widgets/custom_icon_widget.dart';
 
 class StepEntryModalWidget extends StatefulWidget {
-  final Function(int steps) onStepsAdded;
+  final Future<void> Function(int steps) onStepsAdded;
 
   const StepEntryModalWidget({
     super.key,
@@ -272,7 +272,7 @@ class _StepEntryModalWidgetState extends State<StepEntryModalWidget>
     // Add haptic feedback
     HapticFeedback.lightImpact();
 
-    widget.onStepsAdded(steps);
+    await widget.onStepsAdded(steps);
 
     if (mounted) {
       Navigator.of(context).pop();
