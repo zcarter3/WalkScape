@@ -137,9 +137,6 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (isAuthenticated && hasHealthPermissions) {
       Navigator.pushReplacementNamed(context, '/home-dashboard');
-    } else {
-      // Navigate to onboarding (would be implemented in real app)
-      Navigator.pushReplacementNamed(context, '/home-dashboard');
     }
   }
 

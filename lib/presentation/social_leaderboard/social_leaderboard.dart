@@ -22,7 +22,6 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
     with TickerProviderStateMixin {
   late TabController _tabController;
   int _currentBottomIndex = 1;
-  bool _isLoading = false;
 
   // Mock data for current user
   final Map<String, dynamic> _currentUser = {
@@ -265,16 +264,8 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
   }
 
   Future<void> _refreshData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
     // Simulate API call
     await Future.delayed(const Duration(seconds: 1));
-
-    setState(() {
-      _isLoading = false;
-    });
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
