@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../presentation/splash_screen/splash_screen.dart';
-import '../presentation/achievement_gallery/achievement_gallery.dart';
+import '../presentation/splashscreen/splash_screen.dart';
+import '../presentation/achievement/achievement_gallery.dart';
 import '../presentation/home_dashboard/home_dashboard.dart';
-import '../presentation/user_profile/user_profile.dart';
+import '../presentation/user/user_profile.dart';
 import '../presentation/social_leaderboard/social_leaderboard.dart';
 
 class AppRoutes {

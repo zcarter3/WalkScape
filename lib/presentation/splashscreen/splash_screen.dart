@@ -137,9 +137,6 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (isAuthenticated && hasHealthPermissions) {
       Navigator.pushReplacementNamed(context, '/home-dashboard');
-    } else if (isAuthenticated && !hasHealthPermissions) {
-      // Navigate to permission setup (would be implemented in real app)
-      Navigator.pushReplacementNamed(context, '/home-dashboard');
     } else {
       // Navigate to onboarding (would be implemented in real app)
       Navigator.pushReplacementNamed(context, '/home-dashboard');
@@ -156,8 +153,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,

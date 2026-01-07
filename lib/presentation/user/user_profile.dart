@@ -4,9 +4,9 @@ import 'package:sizer/sizer.dart';
 
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_bottom_bar.dart';
-import './widgets/avatar_customization_modal.dart';
-import './widgets/profile_header_widget.dart';
-import './widgets/settings_section_widget.dart';
+import './widget/avatar_customization_modal.dart';
+import './widget/profile_header_widget.dart';
+import './widget/settings_section_widget.dart';
 
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});

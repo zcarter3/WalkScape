@@ -72,7 +72,6 @@ class _ProgressRingWidgetState extends State<ProgressRingWidget>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final progress = (widget.currentSteps / widget.goalSteps).clamp(0.0, 1.0);
     final isGoalReached = widget.currentSteps >= widget.goalSteps;
 
     return GestureDetector(
