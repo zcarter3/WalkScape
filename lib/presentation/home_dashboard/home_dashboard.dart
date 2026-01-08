@@ -6,12 +6,10 @@ import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_bottom_bar.dart';
-import '../../widgets/custom_icon_widget.dart';
 import './widgets/achievements_card_widget.dart';
 import './widgets/greeting_header_widget.dart';
 import './widgets/progress_ring_widget.dart';

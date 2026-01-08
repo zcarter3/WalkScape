@@ -153,7 +153,7 @@ class LeaderboardListItem extends StatelessWidget {
                 width: double.infinity,
                 height: 0.8.h,
                 decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.surfaceVariant,
+                  color: AppTheme.lightTheme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: FractionallySizedBox(
