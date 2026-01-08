@@ -61,14 +61,36 @@ class UserRankCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Your Rank",
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppTheme.lightTheme.colorScheme.onPrimary
-                        .withValues(alpha: 0.8),
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      "Rank #${userData["rank"]}",
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppTheme.lightTheme.colorScheme.onPrimary
+                            .withValues(alpha: 0.8),
+                      ),
+                    ),
+                    if (userData["title"] != null) ...[
+                      SizedBox(width: 2.w),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.3.h),
+                        decoration: BoxDecoration(
+                          color: AppTheme.lightTheme.colorScheme.onPrimary.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          userData["title"] as String,
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.lightTheme.colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 SizedBox(height: 0.5.h),
                 Text(
@@ -79,6 +101,59 @@ class UserRankCard extends StatelessWidget {
                     color: AppTheme.lightTheme.colorScheme.onPrimary,
                   ),
                 ),
+                SizedBox(height: 0.5.h),
+                Row(
+                  children: [
+                    CustomIconWidget(
+                      iconName: 'star',
+                      color: AppTheme.lightTheme.colorScheme.tertiary,
+                      size: 14,
+                    ),
+                    SizedBox(width: 1.w),
+                    Text(
+                      "Level ${userData["level"]}",
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.lightTheme.colorScheme.onPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 0.5.h),
+                if (userData["xp"] != null && userData["nextLevelXP"] != null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${userData["xp"]} / ${userData["nextLevelXP"]} XP",
+                        style: GoogleFonts.inter(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppTheme.lightTheme.colorScheme.onPrimary.withValues(alpha: 0.8),
+                        ),
+                      ),
+                      SizedBox(height: 0.5.h),
+                      Container(
+                        width: 25.w,
+                        height: 0.8.h,
+                        decoration: BoxDecoration(
+                          color: AppTheme.lightTheme.colorScheme.onPrimary.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: FractionallySizedBox(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: ((userData["xp"] as int) / (userData["nextLevelXP"] as int)).clamp(0.0, 1.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppTheme.lightTheme.colorScheme.onPrimary,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 SizedBox(height: 0.5.h),
                 Text(
                   "${userData["weeklySteps"]} steps this week",
@@ -94,22 +169,6 @@ class UserRankCard extends StatelessWidget {
           ),
           Column(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
-                decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.onPrimary,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  "#${userData["rank"]}",
-                  style: GoogleFonts.poppins(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.lightTheme.colorScheme.primary,
-                  ),
-                ),
-              ),
-              SizedBox(height: 1.h),
               Row(
                 children: [
                   CustomIconWidget(

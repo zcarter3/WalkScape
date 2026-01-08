@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -21,22 +26,69 @@ class HomeDashboard extends StatefulWidget {
   State<HomeDashboard> createState() => _HomeDashboardState();
 }
 
-class _HomeDashboardState extends State<HomeDashboard>
-    with TickerProviderStateMixin {
+class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateMixin {
+    void _updateDerivedValues() {
+      _energyPoints = _currentSteps ~/ 100;
+      _distance = _currentSteps * 0.0005; // rough estimate: 0.5 meters per step
+      _calories = (_currentSteps * 0.04).round(); // rough estimate
+      _activeTime = (_currentSteps * 0.01).round(); // rough estimate
+    }
+
+    void _onStepCountError(error) {
+      print('Pedometer error: $error');
+      setState(() {
+        _isPedometerAvailable = false;
+      });
+    }
+  void _checkLevelUp() {
+    // Example logic: Level up every 1000 XP
+    int xpForNextLevel = _userLevel * 1000;
+    while (_userXP >= xpForNextLevel) {
+      _userLevel++;
+      _userXP -= xpForNextLevel;
+      xpForNextLevel = _userLevel * 1000;
+      // Optionally show a level-up notification
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Level Up! You are now level $_userLevel!'),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
 
   late AnimationController _fabAnimationController;
   late Animation<double> _fabAnimation;
 
-  // Mock data for the dashboard
-  int _currentSteps = 7842;
+  // Daily step data
+  int _currentSteps = 0;
   final int _goalSteps = 10000;
   int _energyPoints = 78;
   double _distance = 3.92;
   int _calories = 312;
   int _activeTime = 87; // minutes
   bool _healthPermissionsAvailable = false;
+
+  // User data
+  String _userName = 'Adventurer';
+  String _userAvatar = 'https://images.unsplash.com/photo-1705408115513-3ff15ef55a8d';
+  int _userLevel = 1;
+  int _userXP = 0;
+
+  // Pedometer variables
+  late Stream<StepCount> _stepCountStream;
+  StreamSubscription<StepCount>? _stepCountSubscription;
+  int _initialSteps = 0;
+  bool _isPedometerAvailable = false;
+
+  // Connectivity
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   final List<Map<String, dynamic>> _todayAchievements = [
     {
@@ -84,42 +136,138 @@ class _HomeDashboardState extends State<HomeDashboard>
     ));
 
     _fabAnimationController.forward();
-    _checkHealthPermissions();
+    _initialize();
+  }
+
+  void _initialize() async {
+    await _checkHealthPermissions();
     _loadSteps();
+    _initConnectivity();
+    _initPedometer();
   }
 
   @override
   void dispose() {
     _fabAnimationController.dispose();
+    _stepCountSubscription?.cancel();
+    _connectivitySubscription.cancel();
     super.dispose();
   }
 
   Future<void> _loadSteps() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _currentSteps = prefs.getInt('currentSteps') ?? 7842;
-      _energyPoints = _currentSteps ~/ 100;
-      _distance = _currentSteps * 0.0005;
-      _calories = (_currentSteps * 0.04).round();
-      _activeTime = (_currentSteps * 0.01).round();
-    });
+    String lastDate = prefs.getString('lastDate') ?? '';
+    String today = DateTime.now().toIso8601String().split('T')[0];
+    if (lastDate != today) {
+      // New day, reset steps
+      _currentSteps = 0;
+      _initialSteps = 0;
+      await prefs.setString('lastDate', today);
+      await prefs.setInt('currentSteps', 0);
+      await prefs.setInt('initialSteps', 0);
+    } else {
+      _currentSteps = prefs.getInt('currentSteps') ?? 0;
+      _initialSteps = prefs.getInt('initialSteps') ?? 0;
+    }
+
+    // Load user data
+    _userName = prefs.getString('user_name') ?? 'Adventurer';
+    _userAvatar = prefs.getString('user_avatar') ?? 'https://images.unsplash.com/photo-1705408115513-3ff15ef55a8d';
+    _userLevel = prefs.getInt('user_level') ?? 1;
+    _userXP = prefs.getInt('user_xp') ?? 0;
+
+    _updateDerivedValues();
   }
 
   Future<void> _saveSteps() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt('currentSteps', _currentSteps);
+    await prefs.setInt('initialSteps', _initialSteps);
+    await prefs.setInt('user_level', _userLevel);
+    await prefs.setInt('user_xp', _userXP);
   }
 
-  void _checkHealthPermissions() {
-    // Simulate health permission check
-    Future.delayed(const Duration(milliseconds: 500), () {
+  Future<void> _checkHealthPermissions() async {
+    if (kIsWeb) {
+      // Web doesn't support pedometer, use manual entry
+      setState(() {
+        _healthPermissionsAvailable = false;
+      });
+    } else {
+      PermissionStatus status = await Permission.activityRecognition.request();
+      setState(() {
+        _healthPermissionsAvailable = status.isGranted;
+      });
+    }
+  }
+
+  void _initConnectivity() {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(_onConnectivityChanged);
+  }
+
+  void _onConnectivityChanged(List<ConnectivityResult> results) {
+    if (results.contains(ConnectivityResult.none)) {
+      // Offline mode: switch to manual entry
+      _stepCountSubscription?.cancel();
       if (mounted) {
         setState(() {
-          _healthPermissionsAvailable =
-              false; // Simulating unavailable permissions
+          _healthPermissionsAvailable = false;
+          _isPedometerAvailable = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Offline mode: Manual step entry enabled'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } else {
+      // Online: try to enable pedometer if permissions available
+      if (_healthPermissionsAvailable && !kIsWeb) {
+        _initPedometer();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Online: Pedometer activated'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  void _initPedometer() async {
+    if (_healthPermissionsAvailable && !kIsWeb) {
+      List<ConnectivityResult> results = await Connectivity().checkConnectivity();
+      if (!results.contains(ConnectivityResult.none)) {
+        _stepCountStream = Pedometer.stepCountStream;
+        _stepCountSubscription = _stepCountStream.listen(
+          _onStepCount,
+          onError: _onStepCountError,
+          cancelOnError: true,
+        );
+        setState(() {
+          _isPedometerAvailable = true;
         });
       }
+    }
+  }
+
+  void _onStepCount(StepCount event) {
+    setState(() {
+      if (_initialSteps == 0) {
+        _initialSteps = event.steps;
+      }
+      int newSteps = event.steps - _initialSteps;
+      int stepsGained = newSteps - _currentSteps;
+      _currentSteps = newSteps;
+      // Add XP for steps (1 XP per 10 steps)
+      if (stepsGained > 0) {
+        _userXP += (stepsGained / 10).round();
+        _checkLevelUp();
+      }
+      _updateDerivedValues();
     });
+    _saveSteps();
   }
 
   @override
@@ -149,7 +297,7 @@ class _HomeDashboardState extends State<HomeDashboard>
             children: [
               // Greeting Header
               GreetingHeaderWidget(
-                userName: 'Alex',
+                userName: _userName,
                 currentDate: currentDate,
                 weatherCondition: weatherCondition,
               ),
@@ -214,7 +362,7 @@ class _HomeDashboardState extends State<HomeDashboard>
                       size: 6.w,
                     ),
                     label: Text(
-                      'Add Steps',
+                      kIsWeb ? 'Add Steps (Web Mode)' : 'Add Steps (Offline Mode)',
                       style: TextStyle(
                         color:
                             theme.floatingActionButtonTheme.foregroundColor ??
@@ -289,7 +437,10 @@ class _HomeDashboardState extends State<HomeDashboard>
     if (mounted) {
       setState(() {
         // Simulate slight increase in steps
-        _currentSteps += (DateTime.now().millisecond % 50);
+        int stepsIncrease = (DateTime.now().millisecond % 50);
+        _currentSteps += stepsIncrease;
+        _userXP += (stepsIncrease / 10).round();
+        _checkLevelUp();
         _energyPoints = _currentSteps ~/ 100;
         _distance = _currentSteps * 0.0005; // Rough conversion
         _calories = (_currentSteps * 0.04).round();
@@ -420,6 +571,9 @@ class _HomeDashboardState extends State<HomeDashboard>
         onStepsAdded: (steps) async {
           setState(() {
             _currentSteps += steps;
+            // Add XP for manual entry (same rate as pedometer)
+            _userXP += (steps / 10).round();
+            _checkLevelUp();
             _energyPoints = _currentSteps ~/ 100;
             _distance = _currentSteps * 0.0005;
             _calories = (_currentSteps * 0.04).round();

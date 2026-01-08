@@ -82,14 +82,28 @@ class LeaderboardListItem extends StatelessWidget {
         title: Row(
           children: [
             Expanded(
-              child: Text(
-                user["username"] as String,
-                style: GoogleFonts.poppins(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.lightTheme.colorScheme.onSurface,
-                ),
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user["username"] as String,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.lightTheme.colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (user["title"] != null)
+                    Text(
+                      user["title"] as String,
+                      style: GoogleFonts.inter(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w500,
+                        color: _getRankColor(index),
+                      ),
+                    ),
+                ],
               ),
             ),
             if (user["isOnline"] == true)
@@ -107,33 +121,52 @@ class LeaderboardListItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 0.5.h),
-            Text(
-              "${user["steps"]} steps",
-              style: GoogleFonts.inter(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.lightTheme.colorScheme.primary,
-              ),
-            ),
-            SizedBox(height: 0.5.h),
             Row(
               children: [
+                Text(
+                  "${user["steps"]} steps",
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.lightTheme.colorScheme.primary,
+                  ),
+                ),
+                SizedBox(width: 2.w),
                 CustomIconWidget(
                   iconName: 'star',
                   color: AppTheme.lightTheme.colorScheme.tertiary,
-                  size: 14,
+                  size: 12,
                 ),
-                SizedBox(width: 1.w),
                 Text(
-                  "Level ${user["level"]}",
+                  "Lv.${user["level"]}",
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.lightTheme.colorScheme.tertiary,
                   ),
                 ),
               ],
             ),
+            SizedBox(height: 0.5.h),
+            if (user["xp"] != null && user["nextLevelXP"] != null)
+              Container(
+                width: double.infinity,
+                height: 0.8.h,
+                decoration: BoxDecoration(
+                  color: AppTheme.lightTheme.colorScheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: ((user["xp"] as int) / (user["nextLevelXP"] as int)).clamp(0.0, 1.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.lightTheme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
         trailing: Column(

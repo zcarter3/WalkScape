@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -24,17 +25,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
   int _currentBottomIndex = 1;
 
   // Mock data for current user
-  final Map<String, dynamic> _currentUser = {
-    "id": "current_user",
-    "username": "Alex Johnson",
-    "avatar":
-        "https://img.rocket.new/generatedImages/rocket_gen_img_1d67f557b-1762249150720.png",
-    "avatarSemanticLabel":
-        "Professional headshot of a young man with short brown hair wearing a navy blue shirt, smiling at the camera",
-    "rank": 7,
-    "weeklySteps": 45280,
-    "rankChange": 3,
-  };
+  late Map<String, dynamic> _currentUser;
 
   // Mock data for friends leaderboard
   final List<Map<String, dynamic>> _friendsData = [
@@ -49,6 +40,9 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
       "level": 12,
       "rankChange": 2,
       "isOnline": true,
+      "title": "Elite Adventurer",
+      "xp": 2450,
+      "nextLevelXP": 3000,
     },
     {
       "id": "friend_2",
@@ -61,6 +55,9 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
       "level": 11,
       "rankChange": -1,
       "isOnline": false,
+      "title": "Expert Hiker",
+      "xp": 1890,
+      "nextLevelXP": 2500,
     },
     {
       "id": "friend_3",
@@ -73,6 +70,9 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
       "level": 10,
       "rankChange": 0,
       "isOnline": true,
+      "title": "Advanced Walker",
+      "xp": 1200,
+      "nextLevelXP": 2000,
     },
     {
       "id": "friend_4",
@@ -113,6 +113,9 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
       "level": 18,
       "rankChange": 1,
       "isOnline": true,
+      "title": "Legendary Walker",
+      "xp": 8750,
+      "nextLevelXP": 10000,
     },
     {
       "id": "global_2",
@@ -125,6 +128,9 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
       "level": 17,
       "rankChange": -1,
       "isOnline": false,
+      "title": "Master Explorer",
+      "xp": 7230,
+      "nextLevelXP": 8500,
     },
     {
       "id": "global_3",
@@ -255,12 +261,67 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadUserData();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('user_username') ?? 'Adventurer';
+    final avatar = prefs.getString('user_avatar') ?? 'https://images.unsplash.com/photo-1705408115513-3ff15ef55a8d';
+    final level = prefs.getInt('user_level') ?? 1;
+    final totalSteps = prefs.getInt('user_total_steps') ?? 0;
+
+    setState(() {
+      _currentUser = {
+        "id": "current_user",
+        "username": username,
+        "avatar": avatar,
+        "avatarSemanticLabel": "User avatar",
+        "rank": _calculateRank(totalSteps),
+        "level": level,
+        "weeklySteps": totalSteps, // For now, using total as weekly
+        "rankChange": 0, // Could be calculated based on previous rankings
+        "title": _getRankTitle(_calculateRank(totalSteps)),
+        "xp": prefs.getInt('user_xp') ?? 0,
+        "nextLevelXP": level * 1000, // Simple XP system
+      };
+    });
+  }
+
+  int _calculateRank(int totalSteps) {
+    // Simple ranking system based on total steps
+    if (totalSteps >= 1000000) return 1;
+    if (totalSteps >= 500000) return 2;
+    if (totalSteps >= 250000) return 3;
+    if (totalSteps >= 100000) return 4;
+    if (totalSteps >= 50000) return 5;
+    if (totalSteps >= 25000) return 6;
+    if (totalSteps >= 10000) return 7;
+    if (totalSteps >= 5000) return 8;
+    if (totalSteps >= 1000) return 9;
+    return 10;
+  }
+
+  String _getRankTitle(int rank) {
+    const titles = [
+      'Legendary Walker',
+      'Master Explorer',
+      'Elite Adventurer',
+      'Expert Hiker',
+      'Advanced Walker',
+      'Skilled Trekker',
+      'Apprentice Explorer',
+      'Novice Adventurer',
+      'Beginner Walker',
+      'Rookie',
+    ];
+    return titles[rank - 1] ?? 'Rookie';
   }
 
   Future<void> _refreshData() async {

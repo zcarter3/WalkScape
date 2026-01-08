@@ -3,6 +3,7 @@ import '../presentation/splashscreen/splash_screen.dart';
 import '../presentation/achievement/achievement_gallery.dart';
 import '../presentation/home_dashboard/home_dashboard.dart';
 import '../presentation/user/user_profile.dart';
+import '../presentation/user/profile_creation_screen.dart';
 import '../presentation/social_leaderboard/social_leaderboard.dart';
 
 class AppRoutes {
@@ -12,6 +13,7 @@ class AppRoutes {
   static const String achievementGallery = '/achievement-gallery';
   static const String homeDashboard = '/home-dashboard';
   static const String userProfile = '/user-profile';
+  static const String profileCreation = '/profile-creation';
   static const String socialLeaderboard = '/social-leaderboard';
 
   static Map<String, WidgetBuilder> routes = {
@@ -20,6 +22,7 @@ class AppRoutes {
     achievementGallery: (context) => const AchievementGallery(),
     homeDashboard: (context) => const HomeDashboard(),
     userProfile: (context) => const UserProfile(),
+    profileCreation: (context) => const ProfileCreationScreen(),
     socialLeaderboard: (context) => const SocialLeaderboard(),
     // TODO: Add your other routes here
   };
