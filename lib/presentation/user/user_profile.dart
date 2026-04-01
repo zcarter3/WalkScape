@@ -109,6 +109,9 @@ class _UserProfileState extends State<UserProfile> {
                       items: _getAccountSettingsItems(),
                       onItemTap: _handleAccountSettingsTap,
                     ),
+                  ],
+                ),
+
   // For now, use the same mock achievements as the gallery
   List<Map<String, dynamic>> _getUserAchievements() {
     // All achievements are now based on miles walked, with unique, fun, and competitive requirements
