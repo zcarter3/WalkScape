@@ -17,6 +17,66 @@ class UserProfile extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfile> {
+    // Returns a list of user achievements for the trophy case
+    List<Map<String, dynamic>> _getUserAchievements() {
+      return [
+        {
+          'id': 1,
+          'title': 'Trailblazer',
+          'description': 'Walk 10 miles in a week. Badge: golden boot with wings.',
+          'category': 'Milestone',
+          'rarity': 'rare',
+          'isEarned': true,
+          'progress': 1.0,
+          'requirement': 'Completed',
+          'points': 500,
+        },
+        {
+          'id': 2,
+          'title': 'Night Owl',
+          'description': 'Walk 3 miles after 9pm. Badge: glowing moon with sneakers.',
+          'category': 'Fun',
+          'rarity': 'uncommon',
+          'isEarned': false,
+          'progress': 0.6,
+          'requirement': 'Walk 1.2 more miles at night',
+          'points': 300,
+        },
+        {
+          'id': 3,
+          'title': 'Marathoner',
+          'description': 'Walk 26.2 miles in a month. Badge: marathon medal with confetti.',
+          'category': 'Milestone',
+          'rarity': 'epic',
+          'isEarned': false,
+          'progress': 0.8,
+          'requirement': 'Walk 5.2 more miles',
+          'points': 1000,
+        },
+        {
+          'id': 4,
+          'title': 'Social Sprinter',
+          'description': 'Complete a walk with 3 friends. Badge: group of running shoes.',
+          'category': 'Social',
+          'rarity': 'rare',
+          'isEarned': true,
+          'progress': 1.0,
+          'requirement': 'Completed',
+          'points': 700,
+        },
+        {
+          'id': 5,
+          'title': 'King of the Hill',
+          'description': 'Climb the most elevation in a week. Badge: crown on a mountain with shoes. Compete with friends!',
+          'category': 'Competitive',
+          'rarity': 'epic',
+          'isEarned': false,
+          'progress': 0.33,
+          'requirement': 'Win 1 more weekly climb challenge',
+          'points': 1200,
+        },
+      ];
+    }
   int _currentBottomNavIndex = 3;
   bool _isLoading = false;
 
@@ -109,150 +169,6 @@ class _UserProfileState extends State<UserProfile> {
                       items: _getAccountSettingsItems(),
                       onItemTap: _handleAccountSettingsTap,
                     ),
-                  ],
-                ),
-
-  // For now, use the same mock achievements as the gallery
-  List<Map<String, dynamic>> _getUserAchievements() {
-    // All achievements are now based on miles walked, with unique, fun, and competitive requirements
-    return [
-      {
-        'id': 1,
-        'title': 'Mile One Magic',
-        'description': 'Walk your first mile! Every journey starts with a single, magical step. Confetti guaranteed.',
-        'category': 'Miles',
-        'rarity': 'common',
-        'isEarned': true,
-        'badgeImage': 'https://cdn.pixabay.com/photo/2017/01/31/13/14/foot-2024634_1280.png',
-        'semanticLabel': 'Sparkling golden shoe with confetti',
-        'unlockedDate': DateTime.now().subtract(const Duration(days: 15)),
-        'points': 100,
-        'statistics': {
-          'milesWhenEarned': 1,
-          'daysToComplete': 1,
-        },
-      },
-      {
-        'id': 2,
-        'title': '5 Mile Fiesta',
-        'description': 'Walk 5 miles and unlock a party! The badge is a dancing sneaker with a party hat.',
-        'category': 'Miles',
-        'rarity': 'common',
-        'isEarned': true,
-        'badgeImage': 'https://cdn.pixabay.com/photo/2013/07/12/13/58/shoe-147844_1280.png',
-        'semanticLabel': 'Sneaker with party hat and streamers',
-        'unlockedDate': DateTime.now().subtract(const Duration(days: 12)),
-        'points': 150,
-        'statistics': {
-          'milesWhenEarned': 5,
-          'daysToComplete': 2,
-        },
-      },
-      {
-        'id': 3,
-        'title': 'Marathon Marvel',
-        'description': 'Complete 26.2 miles total. You’re officially a Marvel! Badge: superhero cape on a running shoe.',
-        'category': 'Miles',
-        'rarity': 'rare',
-        'isEarned': true,
-        'badgeImage': 'https://cdn.pixabay.com/photo/2012/04/13/00/22/shoe-31212_1280.png',
-        'semanticLabel': 'Shoe with superhero cape and lightning',
-        'unlockedDate': DateTime.now().subtract(const Duration(days: 8)),
-        'points': 300,
-        'statistics': {
-          'milesWhenEarned': 26.2,
-          'daysToComplete': 7,
-        },
-      },
-      {
-        'id': 4,
-        'title': '50 Mile Showdown',
-        'description': 'Walk 50 miles and unlock a flaming trophy! Compete with friends for the fastest time.',
-        'category': 'Miles',
-        'rarity': 'epic',
-        'isEarned': false,
-        'progress': 0.7,
-        'requirement': 'Walk 15 more miles to unlock',
-        'points': 500,
-      },
-      {
-        'id': 5,
-        'title': 'Centurion Strider',
-        'description': '100 miles! You’re a legend. Badge: Roman helmet on a sneaker. Compete for the leaderboard!',
-        'category': 'Miles',
-        'rarity': 'legendary',
-        'isEarned': false,
-        'progress': 0.4,
-        'requirement': 'Walk 60 more miles to unlock',
-        'points': 1000,
-      },
-      {
-        'id': 6,
-        'title': 'Streak Supreme',
-        'description': 'Walk at least 1 mile every day for 30 days. Badge: flaming calendar with running shoes.',
-        'category': 'Streak',
-        'rarity': 'epic',
-        'isEarned': true,
-        'badgeImage': 'https://cdn.pixabay.com/photo/2014/04/03/10/32/calendar-312779_1280.png',
-        'semanticLabel': 'Flaming calendar with shoes',
-        'unlockedDate': DateTime.now().subtract(const Duration(days: 45)),
-        'points': 900,
-        'statistics': {
-          'milesWhenEarned': 30,
-          'daysToComplete': 30,
-        },
-      },
-      {
-        'id': 7,
-        'title': 'Midnight Milestone',
-        'description': 'Walk a mile at midnight. Badge: glowing moon and neon shoes. Only for night owls!',
-        'category': 'Challenge',
-        'rarity': 'rare',
-        'isEarned': false,
-        'progress': 0.0,
-        'requirement': 'Walk a mile at midnight',
-        'points': 400,
-      },
-      {
-        'id': 8,
-        'title': 'Friendship Dash',
-        'description': 'Walk 10 miles with friends (group challenge). Badge: shoes with sunglasses and high-fives.',
-        'category': 'Social',
-        'rarity': 'rare',
-        'isEarned': true,
-        'badgeImage': 'https://cdn.pixabay.com/photo/2016/03/31/19/56/feet-1290017_1280.png',
-        'semanticLabel': 'Shoes with sunglasses and high-fives',
-        'unlockedDate': DateTime.now().subtract(const Duration(days: 22)),
-        'points': 500,
-        'statistics': {
-          'milesWhenEarned': 10,
-          'daysToComplete': 5,
-        },
-      },
-      {
-        'id': 9,
-        'title': 'Globetrotter',
-        'description': 'Walk 500 miles total. Badge: globe with running shoes orbiting. Compete for the world leaderboard!',
-        'category': 'Miles',
-        'rarity': 'legendary',
-        'isEarned': false,
-        'progress': 0.2,
-        'requirement': 'Walk 400 more miles to unlock',
-        'points': 2000,
-      },
-      {
-        'id': 10,
-        'title': 'King of the Hill',
-        'description': 'Climb the most elevation in a week. Badge: crown on a mountain with shoes. Compete with friends!',
-        'category': 'Competitive',
-        'rarity': 'epic',
-        'isEarned': false,
-        'progress': 0.33,
-        'requirement': 'Win 1 more weekly climb challenge',
-        'points': 1200,
-      },
-    ];
-  }
 
                     // Avatar Customization Section
                     SettingsSectionWidget(
