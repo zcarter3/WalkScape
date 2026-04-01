@@ -7,6 +7,7 @@ import '../../widgets/custom_bottom_bar.dart';
 import './widget/avatar_customization_modal.dart';
 import './widget/profile_header_widget.dart';
 import './widget/settings_section_widget.dart';
+import './widget/trophy_case_widget.dart';
 
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
@@ -90,6 +91,16 @@ class _UserProfileState extends State<UserProfile> {
                       ),
                     ),
 
+                    // Trophy Case Section
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.h),
+                      child: TrophyCaseWidget(
+                        achievements: _getUserAchievements(),
+                        isFriendView: false,
+                        username: userData["username"] as String?,
+                      ),
+                    ),
+
                     SizedBox(height: 3.h),
 
                     // Account Settings Section
@@ -98,6 +109,167 @@ class _UserProfileState extends State<UserProfile> {
                       items: _getAccountSettingsItems(),
                       onItemTap: _handleAccountSettingsTap,
                     ),
+  // For now, use the same mock achievements as the gallery
+  List<Map<String, dynamic>> _getUserAchievements() {
+    // In a real app, filter by user or fetch from DB
+    return [
+      {
+        'id': 1,
+        'title': 'First Steps',
+        'description':
+            'Take your first 1,000 steps in WalkScape. Every journey begins with a single step! Unlock a special badge and a confetti animation!',
+        'category': 'Steps',
+        'rarity': 'common',
+        'isEarned': true,
+        'badgeImage':
+            'https://img.rocket.new/generatedImages/rocket_gen_img_11c702718-1762440146559.png',
+        'semanticLabel':
+            'Golden footprint badge with green background representing first steps achievement',
+        'unlockedDate': DateTime.now().subtract(const Duration(days: 15)),
+        'points': 100,
+        'statistics': {
+          'stepsWhenEarned': 1000,
+          'daysToComplete': 1,
+        },
+      },
+      {
+        'id': 2,
+        'title': 'Marathon Walker',
+        'description':
+            'Walk 26.2 miles in a single day. Push your limits and achieve greatness! Earn a legendary medal and a surprise animation!',
+        'category': 'Steps',
+        'rarity': 'legendary',
+        'isEarned': true,
+        'badgeImage':
+            'https://images.unsplash.com/photo-1727866241882-df87cd3aa9f2',
+        'semanticLabel':
+            'Platinum marathon medal with blue ribbon and running figure silhouette',
+        'unlockedDate': DateTime.now().subtract(const Duration(days: 3)),
+        'points': 1000,
+        'statistics': {
+          'stepsWhenEarned': 52400,
+          'daysToComplete': 45,
+        },
+      },
+      {
+        'id': 3,
+        'title': 'Week Warrior',
+        'description':
+            'Maintain a 7-day walking streak. Consistency is the key to success! Unlock a rare badge and a fireworks animation!',
+        'category': 'Streaks',
+        'rarity': 'rare',
+        'isEarned': true,
+        'badgeImage':
+            'https://img.rocket.new/generatedImages/rocket_gen_img_12c8efd83-1762440142996.png',
+        'semanticLabel':
+            'Silver shield badge with seven stars representing weekly streak achievement',
+        'unlockedDate': DateTime.now().subtract(const Duration(days: 8)),
+        'points': 300,
+        'statistics': {
+          'stepsWhenEarned': 35000,
+          'daysToComplete': 7,
+        },
+      },
+      {
+        'id': 4,
+        'title': 'Mountain Conqueror',
+        'description':
+            'Complete the challenging Mountain Peak trail. Reach new heights in your fitness journey! Earn an epic badge and a mountain summit animation!',
+        'category': 'Trails',
+        'rarity': 'epic',
+        'isEarned': false,
+        'progress': 0.75,
+        'requirement': 'Complete 15 more mountain trail segments',
+        'points': 700,
+      },
+      {
+        'id': 5,
+        'title': 'Social Butterfly',
+        'description':
+            'Add 10 friends and complete a group challenge together. Fitness is better with friends! Unlock a social butterfly badge and a group celebration animation!',
+        'category': 'Social',
+        'rarity': 'rare',
+        'isEarned': false,
+        'progress': 0.4,
+        'requirement': 'Add 6 more friends and join a group challenge',
+        'points': 400,
+      },
+      {
+        'id': 6,
+        'title': 'New Year Champion',
+        'description':
+            'Participate in the New Year fitness challenge and walk 100,000 steps in January. Earn a gold trophy and a confetti burst!',
+        'category': 'Events',
+        'rarity': 'epic',
+        'isEarned': true,
+        'badgeImage':
+            'https://images.unsplash.com/photo-1664208190302-5a112d347b0b',
+        'semanticLabel':
+            'Gold trophy with fireworks design and calendar showing January',
+        'unlockedDate': DateTime.now().subtract(const Duration(days: 45)),
+        'points': 900,
+        'statistics': {
+          'stepsWhenEarned': 100000,
+          'daysToComplete': 31,
+        },
+      },
+      {
+        'id': 7,
+        'title': 'Daily Dedication',
+        'description':
+            'Walk at least 5,000 steps every day for 30 consecutive days. Unlock an epic badge and a streak flame animation!',
+        'category': 'Streaks',
+        'rarity': 'epic',
+        'isEarned': false,
+        'progress': 0.6,
+        'requirement': 'Continue streak for 12 more days',
+        'points': 800,
+      },
+      {
+        'id': 8,
+        'title': 'City Explorer',
+        'description':
+            'Complete all segments of the City Run trail and discover urban fitness. Earn a city explorer badge and a skyline animation!',
+        'category': 'Trails',
+        'rarity': 'rare',
+        'isEarned': true,
+        'badgeImage':
+            'https://images.unsplash.com/photo-1667482246354-48d79748ce33',
+        'semanticLabel':
+            'Bronze badge with city skyline silhouette and running path design',
+        'unlockedDate': DateTime.now().subtract(const Duration(days: 22)),
+        'points': 500,
+        'statistics': {
+          'stepsWhenEarned': 45000,
+          'daysToComplete': 18,
+        },
+      },
+      {
+        'id': 9,
+        'title': 'Step Master',
+        'description':
+            'Reach the milestone of 1 million total steps. You are a true walking champion!',
+        'category': 'Steps',
+        'rarity': 'legendary',
+        'isEarned': false,
+        'progress': 0.85,
+        'requirement': 'Walk 150,000 more steps to unlock',
+        'points': 1000,
+      },
+      {
+        'id': 10,
+        'title': 'Team Player',
+        'description':
+            'Help your team win 3 group challenges. Teamwork makes the dream work!',
+        'category': 'Social',
+        'rarity': 'epic',
+        'isEarned': false,
+        'progress': 0.33,
+        'requirement': 'Win 2 more team challenges',
+        'points': 300,
+      },
+    ];
+  }
 
                     // Avatar Customization Section
                     SettingsSectionWidget(
