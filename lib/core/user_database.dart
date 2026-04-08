@@ -11,13 +11,6 @@ class UserDatabase {
     _users = {};
   }
 
-  /*FirebaseDatabase database = FirebaseDatabase.instance;
-  await ref.set({
-    "username" : ,
-    "Email" : ,
-    "Password" : ,
-  });*/
-
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     final content = prefs.getString(_prefsKey);
