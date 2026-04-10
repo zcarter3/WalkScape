@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -99,9 +101,10 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
   StreamSubscription? _stepCountSubscription;
   StreamSubscription? _connectivitySubscription;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  // Stream<StepCount>? _stepCountStream;
 
-
+  // Pedometer variables
+  late Stream<StepCount> _stepCountStream;
+  bool _isPedometerAvailable = false;
 
   @override
   void initState() {
@@ -137,22 +140,53 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
     await prefs.setInt('user_xp', _userXP);
   }
 
-  // void _onStepCount(StepCount event) {
-  //   setState(() {
-  //     if (_initialSteps == 0) {
-  //       _initialSteps = event.steps;
-  //     }
-  //     int newSteps = event.steps - _initialSteps;
-  //     int stepsGained = newSteps - _currentSteps;
-  //     _currentSteps = newSteps;
-  //     if (stepsGained > 0) {
-  //       _userXP += (stepsGained / 10).round();
-  //       _checkLevelUp();
-  //     }
-  //     _updateDerivedValues();
-  //   });
-  //   _saveSteps();
-  // }
+  void _onStepCountError(error) {
+      print('Pedometer error: $error');
+      setState(() {
+        _isPedometerAvailable = false;
+      });
+    }
+
+  /*void _initPedometer() async {
+    if (_healthPermissionsAvailable && !kIsWeb) {
+      List<ConnectivityResult> results = await Connectivity().checkConnectivity();
+      if (!results.contains(ConnectivityResult.none)) {
+        _stepCountStream = Pedometer.stepCountStream;
+        _stepCountSubscription = _stepCountStream.listen(
+          _onStepCount,
+          onError: _onStepCountError,
+          cancelOnError: true,
+        );
+        setState(() {
+          _isPedometerAvailable = true;
+        });
+      }
+    }
+  }*/
+
+  void onStepCount(StepCount event) {
+    print(event);
+    setState(() {
+      _currentSteps = event.steps;
+    });
+  }
+
+  /* void _onStepCount(StepCount event) {
+     setState(() {
+       if (_initialSteps == 0) {
+         _initialSteps = event.steps;
+       }
+       int newSteps = event.steps - _initialSteps;
+       int stepsGained = newSteps - _currentSteps;
+       _currentSteps = newSteps;
+       if (stepsGained > 0) {
+         _userXP += (stepsGained / 10).round();
+         _checkLevelUp();
+       }
+       _updateDerivedValues();
+     });
+     _saveSteps();
+ } */
 
   @override
   Widget build(BuildContext context) {
