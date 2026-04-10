@@ -26,185 +26,212 @@ class LeaderboardListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isTop3 = index < 3;
+    final rankColor = _getRankColor(index);
+
     Widget listItem = Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.5.h),
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 0.6.h),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        gradient: isTop3
+            ? LinearGradient(
+                colors: [
+                  rankColor.withValues(alpha: 0.15),
+                  rankColor.withValues(alpha: 0.04),
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              )
+            : null,
+        color: isTop3 ? null : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isTop3 ? rankColor.withValues(alpha: 0.4) : theme.colorScheme.outline.withValues(alpha: 0.1),
+          width: isTop3 ? 2 : 1,
+        ),
         boxShadow: [
-          BoxShadow(
-            color: AppTheme.lightTheme.shadowColor,
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
+          if (isTop3)
+            BoxShadow(
+              color: rankColor.withValues(alpha: 0.18),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            )
+          else
+            BoxShadow(
+              color: theme.shadowColor.withValues(alpha: 0.06),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
         ],
       ),
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 8.w,
-              alignment: Alignment.center,
-              child: Text(
-                "#${index + 1}",
-                style: GoogleFonts.poppins(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: _getRankColor(index),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
+          child: Row(
+            children: [
+              // Rank badge
+              Container(
+                width: 10.w,
+                height: 10.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: isTop3
+                      ? LinearGradient(
+                          colors: [rankColor, rankColor.withValues(alpha: 0.7)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : null,
+                  color: isTop3 ? null : theme.colorScheme.surfaceContainerHighest,
+                ),
+                child: Center(
+                  child: isTop3
+                      ? Text(_getRankEmoji(index), style: const TextStyle(fontSize: 20))
+                      : Text(
+                          '#${index + 1}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                 ),
               ),
-            ),
-            SizedBox(width: 3.w),
-            Container(
-              width: 12.w,
-              height: 12.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: _getRankColor(index),
-                  width: 2,
+              SizedBox(width: 3.w),
+
+              // Avatar
+              Container(
+                width: 11.w,
+                height: 11.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: rankColor, width: isTop3 ? 2.5 : 1.5),
+                ),
+                child: ClipOval(
+                  child: CustomImageWidget(
+                    imageUrl: user["avatar"] as String,
+                    width: 11.w,
+                    height: 11.w,
+                    fit: BoxFit.cover,
+                    semanticLabel: user["avatarSemanticLabel"] as String,
+                  ),
                 ),
               ),
-              child: ClipOval(
-                child: CustomImageWidget(
-                  imageUrl: user["avatar"] as String,
-                  width: 12.w,
-                  height: 12.w,
-                  fit: BoxFit.cover,
-                  semanticLabel: user["avatarSemanticLabel"] as String,
+              SizedBox(width: 3.w),
+
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            user["username"] as String,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (user["isOnline"] == true) ...[
+                          SizedBox(width: 2.w),
+                          Container(
+                            width: 2.w,
+                            height: 2.w,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF4CAF50),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    SizedBox(height: 0.3.h),
+                    Row(
+                      children: [
+                        Text(
+                          '⚡ Lv.${user["level"]}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.tertiary,
+                          ),
+                        ),
+                        if (user["title"] != null) ...[
+                          SizedBox(width: 2.w),
+                          Flexible(
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.2.h),
+                              decoration: BoxDecoration(
+                                color: rankColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                user["title"] as String,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 9.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: rankColor,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
-        title: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+
+              // Steps + rank change
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    user["username"] as String,
+                    _formatSteps(user["steps"] as int),
                     style: GoogleFonts.poppins(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.lightTheme.colorScheme.onSurface,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (user["title"] != null)
-                    Text(
-                      user["title"] as String,
-                      style: GoogleFonts.inter(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w500,
-                        color: _getRankColor(index),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            if (user["isOnline"] == true)
-              Container(
-                width: 2.w,
-                height: 2.w,
-                decoration: BoxDecoration(
-                  color: AppTheme.successLight,
-                  shape: BoxShape.circle,
-                ),
-              ),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 0.5.h),
-            Row(
-              children: [
-                Text(
-                  "${user["steps"]} steps",
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppTheme.lightTheme.colorScheme.primary,
-                  ),
-                ),
-                SizedBox(width: 2.w),
-                CustomIconWidget(
-                  iconName: 'star',
-                  color: AppTheme.lightTheme.colorScheme.tertiary,
-                  size: 12,
-                ),
-                Text(
-                  "Lv.${user["level"]}",
-                  style: GoogleFonts.inter(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.lightTheme.colorScheme.tertiary,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 0.5.h),
-            if (user["xp"] != null && user["nextLevelXP"] != null)
-              Container(
-                width: double.infinity,
-                height: 0.8.h,
-                decoration: BoxDecoration(
-                  color: AppTheme.lightTheme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: ((user["xp"] as int) / (user["nextLevelXP"] as int)).clamp(0.0, 1.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.lightTheme.colorScheme.primary,
-                      borderRadius: BorderRadius.circular(4),
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w700,
+                      color: isTop3 ? rankColor : theme.colorScheme.primary,
                     ),
                   ),
-                ),
-              ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (user["rankChange"] != null)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CustomIconWidget(
-                    iconName: (user["rankChange"] as int) > 0
-                        ? 'keyboard_arrow_up'
-                        : (user["rankChange"] as int) < 0
-                            ? 'keyboard_arrow_down'
-                            : 'remove',
-                    color: (user["rankChange"] as int) > 0
-                        ? AppTheme.successLight
-                        : (user["rankChange"] as int) < 0
-                            ? AppTheme.lightTheme.colorScheme.error
-                            : AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                    size: 16,
-                  ),
-                  if ((user["rankChange"] as int) != 0)
-                    Text(
-                      "${(user["rankChange"] as int).abs()}",
-                      style: GoogleFonts.inter(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w500,
-                        color: (user["rankChange"] as int) > 0
-                            ? AppTheme.successLight
-                            : AppTheme.lightTheme.colorScheme.error,
-                      ),
+                  if (user["rankChange"] != null && (user["rankChange"] as int) != 0)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          (user["rankChange"] as int) > 0
+                              ? Icons.arrow_drop_up_rounded
+                              : Icons.arrow_drop_down_rounded,
+                          color: (user["rankChange"] as int) > 0
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFFE53935),
+                          size: 18,
+                        ),
+                        Text(
+                          '${(user["rankChange"] as int).abs()}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w600,
+                            color: (user["rankChange"] as int) > 0
+                                ? const Color(0xFF4CAF50)
+                                : const Color(0xFFE53935),
+                          ),
+                        ),
+                      ],
                     ),
                 ],
               ),
-          ],
+            ],
+          ),
         ),
-        onTap: onTap,
       ),
     );
 
@@ -216,16 +243,16 @@ class LeaderboardListItem extends StatelessWidget {
           children: [
             SlidableAction(
               onPressed: (_) => onMessage?.call(),
-              backgroundColor: AppTheme.lightTheme.colorScheme.secondary,
-              foregroundColor: AppTheme.lightTheme.colorScheme.onSecondary,
+              backgroundColor: theme.colorScheme.secondary,
+              foregroundColor: theme.colorScheme.onSecondary,
               icon: Icons.message,
               label: 'Message',
               borderRadius: BorderRadius.circular(12),
             ),
             SlidableAction(
               onPressed: (_) => onChallenge?.call(),
-              backgroundColor: AppTheme.lightTheme.colorScheme.tertiary,
-              foregroundColor: AppTheme.lightTheme.colorScheme.onTertiary,
+              backgroundColor: theme.colorScheme.tertiary,
+              foregroundColor: theme.colorScheme.onTertiary,
               icon: Icons.sports_martial_arts,
               label: 'Challenge',
               borderRadius: BorderRadius.circular(12),
@@ -239,16 +266,26 @@ class LeaderboardListItem extends StatelessWidget {
     return listItem;
   }
 
+  String _getRankEmoji(int index) {
+    switch (index) {
+      case 0: return '👑';
+      case 1: return '🥈';
+      case 2: return '🥉';
+      default: return '';
+    }
+  }
+
+  String _formatSteps(int steps) {
+    if (steps >= 1000) return '${(steps / 1000).toStringAsFixed(1)}K';
+    return '$steps';
+  }
+
   Color _getRankColor(int index) {
     switch (index) {
-      case 0:
-        return const Color(0xFFFFD700); // Gold
-      case 1:
-        return const Color(0xFFC0C0C0); // Silver
-      case 2:
-        return const Color(0xFFCD7F32); // Bronze
-      default:
-        return AppTheme.lightTheme.colorScheme.onSurfaceVariant;
+      case 0: return const Color(0xFFFFD700);
+      case 1: return const Color(0xFFA8A8A8);
+      case 2: return const Color(0xFFCD7F32);
+      default: return const Color(0xFF78909C);
     }
   }
 }

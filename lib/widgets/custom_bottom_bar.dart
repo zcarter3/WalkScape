@@ -92,7 +92,7 @@ class CustomBottomBar extends StatelessWidget {
             // Haptic feedback for navigation
             HapticFeedback.lightImpact();
             onTap(index);
-            Navigator.pushNamed(context, route);
+            Navigator.pushReplacementNamed(context, route);
           }
         },
         child: AnimatedContainer(

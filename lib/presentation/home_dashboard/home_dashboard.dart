@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_export.dart';
+import '../../core/pedometer_service.dart';
+import '../../core/weather_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import './widgets/achievements_card_widget.dart';
@@ -23,29 +25,32 @@ class HomeDashboard extends StatefulWidget {
   State<HomeDashboard> createState() => _HomeDashboardState();
 }
 
-class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateMixin {
+class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateMixin, WidgetsBindingObserver {
   // --- Fields ---
-  final Set<int> _unlockedStarterAchievements = {};
   final String _questTitle = 'Walk 500 Steps';
   final String _questDescription = 'Take 500 steps today to complete your daily quest!';
-  final bool _questCompleted = false;
-  final String _userName = '';
+  bool _questCompleted = false;
+  String _userName = '';
   int _userXP = 0;
-  final int _userLevel = 1;
+  int _userLevel = 1;
   int _currentSteps = 0;
-  final int _initialSteps = 0;
-  final int _goalSteps = 10000;
+  int _goalSteps = 10000;
   int _energyPoints = 0;
   double _distance = 0.0;
   double _calories = 0.0;
   double _activeTime = 0.0;
-  final bool _healthPermissionsAvailable = false;
   final List<Map<String, dynamic>> _todayAchievements = [];
   AnimationController? _fabAnimationController;
   Animation<double>? _fabAnimation;
-  StreamSubscription? _stepCountSubscription;
-  StreamSubscription? _connectivitySubscription;
+  StreamSubscription<int>? _stepCountSubscription;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  Timer? _saveDebounce;
+
+  final PedometerService _pedometer = PedometerService.instance;
+  final WeatherService _weather = WeatherService.instance;
+  String _weatherCondition = '';
+  String _weatherCity = '';
+  int _weatherTempF = 0;
 
   // --- Utility Methods ---
   String _formatCurrentDate() {
@@ -61,33 +66,24 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
     }
 
     String _getCurrentWeather() {
-      final hour = DateTime.now().hour;
-      if (hour >= 6 && hour < 12) {
-        return 'Sunny';
-      } else if (hour >= 12 && hour < 18) {
-        return 'Cloudy';
-      } else {
-        return 'Clear';
+      return _weatherCondition.isEmpty ? 'Loading...' : _weatherCondition;
+    }
+
+    Future<void> _loadWeather() async {
+      await _weather.refresh();
+      if (mounted) {
+        setState(() {
+          _weatherCondition = _weather.condition;
+          _weatherCity = _weather.city;
+          _weatherTempF = _weather.tempF;
+        });
       }
     }
 
     Future<void> _refreshHealthData() async {
       HapticFeedback.mediumImpact();
-      await Future.delayed(const Duration(milliseconds: 1500));
+      await Future.wait([_pedometer.refresh(), _loadWeather()]);
       if (mounted) {
-        setState(() {
-          int stepsIncrease = (DateTime.now().millisecond % 50);
-          _currentSteps += stepsIncrease;
-          _userXP += (stepsIncrease / 10).round();
-          _checkLevelUp();
-          _energyPoints = _currentSteps ~/ 100;
-          _distance = _currentSteps * 0.0005;
-          _calories = _currentSteps * 0.04;
-          _activeTime = _currentSteps * 0.01;
-        });
-        await _saveSteps();
-        _checkAndUnlockStarterAchievements();
-        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Health data synced successfully!'),
@@ -100,7 +96,22 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
     }
 
     void _checkLevelUp() {
-      // Level up logic placeholder
+      final newLevel = (_userXP / 500).floor() + 1;
+      if (newLevel > _userLevel) {
+        _userLevel = newLevel;
+      }
+    }
+
+    Future<void> _loadUserData() async {
+      final prefs = await SharedPreferences.getInstance();
+      if (mounted) {
+        setState(() {
+          _userName = prefs.getString('user_username') ?? '';
+          _goalSteps = prefs.getInt('goalSteps') ?? 10000;
+          _userLevel = prefs.getInt('user_level') ?? 1;
+          _userXP = prefs.getInt('user_xp') ?? 0;
+        });
+      }
     }
 
     void _checkAndUnlockStarterAchievements() {
@@ -125,8 +136,9 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         },
       ];
       for (final ach in starterAchievements) {
-        if (_currentSteps >= ach['steps'] && !_unlockedStarterAchievements.contains(ach['id'])) {
-          _unlockedStarterAchievements.add(ach['id']);
+        final id = ach['id'] as int;
+        if (_currentSteps >= ach['steps'] && !_pedometer.isAchievementUnlocked(id)) {
+          _pedometer.unlockAchievement(id);
           _showAchievementNotification(ach['title'], ach['message']);
         }
       }
@@ -134,10 +146,9 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
 
     Future<void> _saveSteps() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('currentSteps', _currentSteps);
-      await prefs.setInt('initialSteps', _initialSteps);
       await prefs.setInt('user_level', _userLevel);
       await prefs.setInt('user_xp', _userXP);
+      await prefs.setInt('goalSteps', _goalSteps);
     }
 
     // --- Confetti Celebration Widget ---
@@ -158,7 +169,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                 width: size * (0.3 + random.nextDouble() * 0.7),
                 height: size * (0.3 + random.nextDouble() * 0.7),
                 decoration: BoxDecoration(
-                  color: c.withOpacity(0.7),
+                  color: c.withValues(alpha: 0.7),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -184,7 +195,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.shadowColor.withOpacity(0.2),
+                    color: theme.shadowColor.withValues(alpha: 0.2),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -238,7 +249,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.shadowColor.withOpacity(0.2),
+                    color: theme.shadowColor.withValues(alpha: 0.2),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -303,7 +314,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                 width: 12.w,
                 height: 0.5.h,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -346,6 +357,10 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         onTap: () {
           if (!isCurrentGoal) {
             HapticFeedback.lightImpact();
+            setState(() {
+              _goalSteps = goalValue;
+            });
+            _saveSteps();
             Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -364,10 +379,10 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
           decoration: BoxDecoration(
             color: isCurrentGoal
                 ? theme.colorScheme.primary
-                : theme.colorScheme.primary.withOpacity(0.1),
+                : theme.colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: theme.colorScheme.primary.withOpacity(0.3),
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
             ),
           ),
           child: Text(
@@ -391,17 +406,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         isScrollControlled: true,
         builder: (context) => StepEntryModalWidget(
           onStepsAdded: (steps) async {
-            setState(() {
-              _currentSteps += steps;
-              _userXP += (steps / 10).round();
-              _checkLevelUp();
-              _energyPoints = _currentSteps ~/ 100;
-              _distance = _currentSteps * 0.0005;
-              _calories = _currentSteps * 0.04;
-              _activeTime = _currentSteps * 0.01;
-            });
-            await _saveSteps();
-            _checkAndUnlockStarterAchievements();
+            await _pedometer.addManualSteps(steps);
           },
         ),
       );
@@ -410,8 +415,9 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
     @override
     void initState() {
       super.initState();
+      WidgetsBinding.instance.addObserver(this);
       _fabAnimationController = AnimationController(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 400),
         vsync: this,
       );
       _fabAnimation = Tween<double>(
@@ -422,13 +428,60 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         curve: Curves.easeInOut,
       ));
       _fabAnimationController!.forward();
+
+      _initPedometer();
+    }
+
+    Future<void> _initPedometer() async {
+      await _pedometer.init();
+      _loadWeather();
+      _loadUserData();
+
+      // Set initial value from service.
+      _updateStepsFromService(_pedometer.todaySteps);
+
+      // Listen for real-time updates from the hardware sensor.
+      _stepCountSubscription = _pedometer.stepsStream.listen((steps) {
+        if (mounted) {
+          _updateStepsFromService(steps);
+        }
+      });
+    }
+
+    void _updateStepsFromService(int steps) {
+      setState(() {
+        _currentSteps = steps;
+        _userXP = (steps / 10).round();
+        _checkLevelUp();
+        _energyPoints = _currentSteps ~/ 100;
+        _distance = _currentSteps * 0.0005;
+        _calories = _currentSteps * 0.04;
+        _activeTime = _currentSteps * 0.01;
+        if (!_questCompleted && _currentSteps >= 500) {
+          _questCompleted = true;
+        }
+      });
+      // Debounce disk writes — coalesce rapid step events into a single save.
+      _saveDebounce?.cancel();
+      _saveDebounce = Timer(const Duration(seconds: 2), _saveSteps);
+      _checkAndUnlockStarterAchievements();
+    }
+
+    @override
+    void didChangeAppLifecycleState(AppLifecycleState state) {
+      if (state == AppLifecycleState.resumed) {
+        // App returned to foreground — pick up any steps taken while backgrounded.
+        _pedometer.refresh();
+        _updateStepsFromService(_pedometer.todaySteps);
+      }
     }
 
     @override
     void dispose() {
+      WidgetsBinding.instance.removeObserver(this);
+      _saveDebounce?.cancel();
       _fabAnimationController?.dispose();
       _stepCountSubscription?.cancel();
-      _connectivitySubscription?.cancel();
       super.dispose();
     }
 
@@ -459,6 +512,41 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
+                // Permission denied banner
+                if (_pedometer.permissionDenied && !kIsWeb)
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.sensors_off,
+                            color: theme.colorScheme.onErrorContainer, size: 6.w),
+                        SizedBox(width: 3.w),
+                        Expanded(
+                          child: Text(
+                            'Step sensor permission denied. Tap to enable.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onErrorContainer,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            await _pedometer.retryPermission();
+                            if (mounted) setState(() {});
+                          },
+                          child: Text('Enable',
+                              style: TextStyle(
+                                  color: theme.colorScheme.onErrorContainer,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                      ],
+                    ),
+                  ),
                 // Daily Quest Widget
                 DailyQuestWidget(
                   questTitle: _questTitle,
@@ -483,6 +571,8 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                   userName: _userName,
                   currentDate: currentDate,
                   weatherCondition: weatherCondition,
+                  temperatureF: _weatherTempF != 0 ? _weatherTempF : null,
+                  city: _weatherCity.isNotEmpty ? _weatherCity : null,
                 ),
                 SizedBox(height: 2.h),
                 ProgressRingWidget(
@@ -517,7 +607,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
             ),
           ),
         ),
-        floatingActionButton: !_healthPermissionsAvailable
+        floatingActionButton: (!_pedometer.sensorAvailable || kIsWeb)
             ? AnimatedBuilder(
                 animation: _fabAnimation!,
                 builder: (context, child) {
@@ -532,7 +622,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                         size: 6.w,
                       ),
                       label: Text(
-                        kIsWeb ? 'Add Steps (Web Mode)' : 'Add Steps (Offline Mode)',
+                        kIsWeb ? 'Add Steps (Web Mode)' : 'Add Steps',
                         style: TextStyle(
                           color:
                               theme.floatingActionButtonTheme.foregroundColor ??

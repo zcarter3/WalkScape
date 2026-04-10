@@ -8,9 +8,6 @@ import '../presentation/social_leaderboard/social_leaderboard.dart';
 import '../presentation/user/login_screen.dart';
 
 
-const String homeRoute = '/home';
-const String profileRoute = '/profile';
-const String settingsRoute = '/settings';
 const String initial = '/';
 const String splash = '/splash-screen';
 const String achievementGallery = '/achievement-gallery';

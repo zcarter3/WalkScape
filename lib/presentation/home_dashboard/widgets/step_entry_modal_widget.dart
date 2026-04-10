@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
-import '../../../widgets/custom_icon_widget.dart';
 
 class StepEntryModalWidget extends StatefulWidget {
   final Future<void> Function(int steps) onStepsAdded;
@@ -263,9 +262,6 @@ class _StepEntryModalWidgetState extends State<StepEntryModalWidget>
     setState(() {
       _isLoading = true;
     });
-
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 800));
 
     final steps = int.parse(_stepsController.text);
 

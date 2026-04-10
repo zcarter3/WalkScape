@@ -15,6 +15,7 @@ class TeamChallengeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final double progress =
         (team["currentSteps"] as int) / (team["targetSteps"] as int);
     final List<dynamic> members = team["members"] as List<dynamic>;
@@ -22,11 +23,11 @@ class TeamChallengeCard extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.lightTheme.shadowColor,
+            color: theme.shadowColor,
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -47,13 +48,13 @@ class TeamChallengeCard extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.all(2.w),
                       decoration: BoxDecoration(
-                        color: AppTheme.lightTheme.colorScheme.primary
+                        color: theme.colorScheme.primary
                             .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: CustomIconWidget(
                         iconName: 'groups',
-                        color: AppTheme.lightTheme.colorScheme.primary,
+                        color: theme.colorScheme.primary,
                         size: 24,
                       ),
                     ),
@@ -67,7 +68,7 @@ class TeamChallengeCard extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.lightTheme.colorScheme.onSurface,
+                              color: theme.colorScheme.onSurface,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -76,8 +77,7 @@ class TeamChallengeCard extends StatelessWidget {
                             style: GoogleFonts.inter(
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w400,
-                              color: AppTheme
-                                  .lightTheme.colorScheme.onSurfaceVariant,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -89,7 +89,7 @@ class TeamChallengeCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: progress >= 1.0
                             ? AppTheme.successLight
-                            : AppTheme.lightTheme.colorScheme.tertiary,
+                            : theme.colorScheme.tertiary,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -111,26 +111,32 @@ class TeamChallengeCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
-                    color: AppTheme.lightTheme.colorScheme.onSurface,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 SizedBox(height: 1.h),
                 Row(
                   children: [
-                    Text(
-                      "${team["currentSteps"]}",
-                      style: GoogleFonts.poppins(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.lightTheme.colorScheme.primary,
+                    Flexible(
+                      child: Text(
+                        "${team["currentSteps"]}",
+                        style: GoogleFonts.poppins(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.primary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Text(
-                      " / ${team["targetSteps"]} steps",
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                    Flexible(
+                      child: Text(
+                        " / ${team["targetSteps"]} steps",
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -140,12 +146,12 @@ class TeamChallengeCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: LinearProgressIndicator(
                     value: progress.clamp(0.0, 1.0),
-                    backgroundColor: AppTheme.lightTheme.colorScheme.primary
+                    backgroundColor: theme.colorScheme.primary
                         .withValues(alpha: 0.2),
                     valueColor: AlwaysStoppedAnimation<Color>(
                       progress >= 1.0
                           ? AppTheme.successLight
-                          : AppTheme.lightTheme.colorScheme.primary,
+                          : theme.colorScheme.primary,
                     ),
                     minHeight: 8,
                   ),
@@ -160,7 +166,7 @@ class TeamChallengeCard extends StatelessWidget {
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
                           color:
-                              AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                              theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -173,7 +179,7 @@ class TeamChallengeCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: AppTheme.lightTheme.colorScheme.primary,
+                              color: theme.colorScheme.primary,
                               width: 2,
                             ),
                           ),

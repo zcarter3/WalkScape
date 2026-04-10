@@ -3,40 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/app_export.dart';
-
-String getAchievementEmoji(String category) {
-  switch (category.toLowerCase()) {
-    case 'steps':
-      return '👣';
-    case 'streaks':
-      return '🔥';
-    case 'trails':
-      return '⛰️';
-    case 'social':
-      return '🤝';
-    case 'events':
-      return '🎊';
-    default:
-      return '🏅';
-  }
-}
-
-String getMotivationalMessage(String category) {
-  switch (category.toLowerCase()) {
-    case 'steps':
-      return 'Every step counts! Keep moving!';
-    case 'streaks':
-      return 'Keep your streak alive!';
-    case 'trails':
-      return 'Adventure awaits on the trail!';
-    case 'social':
-      return 'Invite friends for more fun!';
-    case 'events':
-      return 'Special event, special you!';
-    default:
-      return 'You are closer than you think!';
-  }
-}
+import '../../../core/achievement_utils.dart';
 
 class AchievementCard extends StatelessWidget {
   final Map<String, dynamic> achievement;
@@ -53,9 +20,10 @@ class AchievementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isEarned = achievement['isEarned'] as bool;
+    final isEarned = achievement['isEarned'] as bool? ?? false;
     final progress = achievement['progress'] as double? ?? 0.0;
-    final emoji = getAchievementEmoji(achievement['category'] as String);
+    final category = achievement['category'] as String? ?? '';
+    final emoji = getAchievementEmoji(category);
 
     return GestureDetector(
       onTap: () {
@@ -117,25 +85,25 @@ class AchievementCard extends StatelessWidget {
                       ),
                       child: isEarned
                           ? CustomImageWidget(
-                              imageUrl: achievement['badgeImage'] as String,
+                              imageUrl: achievement['badgeImage'] as String? ?? '',
                               width: 12.w,
                               height: 12.w,
                               fit: BoxFit.contain,
                               semanticLabel:
-                                  achievement['semanticLabel'] as String,
+                                  achievement['semanticLabel'] as String? ?? '',
                             )
-                          : CustomIconWidget(
-                              iconName: 'lock_outline',
-                              size: 8.w,
-                                color: theme.colorScheme.onSurface
-                                  .withValues(alpha: 0.4),
+                          : Center(
+                              child: Text(
+                                '❓',
+                                style: TextStyle(fontSize: 8.w * 0.6),
+                              ),
                             ),
                     ),
                     if (!isEarned && progress > 0)
                       Positioned(
                         bottom: 0,
                         child: AnimatedContainer(
-                          duration: Duration(milliseconds: 600),
+                          duration: const Duration(milliseconds: 600),
                           curve: Curves.easeInOut,
                           width: 16.w * progress,
                           height: 0.7.h,
@@ -176,12 +144,12 @@ class AchievementCard extends StatelessWidget {
                   children: [
                     Text(
                       emoji,
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                     ),
                     SizedBox(width: 1.w),
                     Flexible(
                       child: Text(
-                        achievement['title'] as String,
+                        achievement['title'] as String? ?? '',
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.w600,
                             color: isEarned
@@ -201,16 +169,14 @@ class AchievementCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
                 decoration: BoxDecoration(
-                    color: _getCategoryColor(
-                        achievement['category'] as String, theme)
+                    color: _getCategoryColor(category, theme)
                       .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  achievement['category'] as String,
+                  category,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: _getCategoryColor(
-                        achievement['category'] as String, theme),
+                    color: _getCategoryColor(category, theme),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -219,7 +185,7 @@ class AchievementCard extends StatelessWidget {
               if (isEarned && achievement['unlockedDate'] != null) ...[
                 SizedBox(height: 0.5.h),
                 Text(
-                  'Unlocked ${_formatDate(achievement['unlockedDate'] as DateTime)}',
+                  'Unlocked ${_formatDate(achievement['unlockedDate'] as DateTime? ?? DateTime.now())}',
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
@@ -227,7 +193,7 @@ class AchievementCard extends StatelessWidget {
               ] else if (!isEarned) ...[
                 SizedBox(height: 0.5.h),
                 Text(
-                  getMotivationalMessage(achievement['category'] as String),
+                  getMotivationalMessage(category),
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.primary.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w500,
@@ -245,31 +211,33 @@ class AchievementCard extends StatelessWidget {
               child: IgnorePointer(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('🎉', style: TextStyle(fontSize: 60)),
-                    SizedBox(height: 2.h),
-                    Text(
-                      'Achievement Unlocked!',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            color: theme.colorScheme.primary.withOpacity(0.3),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    const Text('🎉', style: TextStyle(fontSize: 40)),
                     SizedBox(height: 1.h),
-                    Text(
-                      getMotivationalMessage(achievement['category'] as String),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.secondary,
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Text(
+                        'Achievement Unlocked!',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      textAlign: TextAlign.center,
+                    ),
+                    Flexible(
+                      child: Text(
+                        getMotivationalMessage(category),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.secondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),

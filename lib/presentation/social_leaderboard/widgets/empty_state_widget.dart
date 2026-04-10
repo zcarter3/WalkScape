@@ -21,6 +21,7 @@ class EmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Padding(
         padding: EdgeInsets.all(8.w),
@@ -31,14 +32,14 @@ class EmptyStateWidget extends StatelessWidget {
               width: 25.w,
               height: 25.w,
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.primary
+                color: theme.colorScheme.primary
                     .withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: CustomIconWidget(
                   iconName: iconName,
-                  color: AppTheme.lightTheme.colorScheme.primary,
+                  color: theme.colorScheme.primary,
                   size: 48,
                 ),
               ),
@@ -49,7 +50,7 @@ class EmptyStateWidget extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.lightTheme.colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -59,7 +60,7 @@ class EmptyStateWidget extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
-                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),

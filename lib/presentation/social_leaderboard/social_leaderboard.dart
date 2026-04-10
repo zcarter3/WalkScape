@@ -25,7 +25,8 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
   int _currentBottomIndex = 1;
 
   // Mock data for current user
-  late Map<String, dynamic> _currentUser;
+  Map<String, dynamic>? _currentUser;
+  bool _isLoading = true;
 
   // Mock data for friends leaderboard
   final List<Map<String, dynamic>> _friendsData = [
@@ -291,6 +292,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
         "xp": prefs.getInt('user_xp') ?? 0,
         "nextLevelXP": level * 1000, // Simple XP system
       };
+      _isLoading = false;
     });
   }
 
@@ -329,10 +331,11 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
     await Future.delayed(const Duration(seconds: 1));
 
     if (mounted) {
+      final theme = Theme.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Leaderboard updated!'),
-          backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+          backgroundColor: theme.colorScheme.primary,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -343,6 +346,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
   }
 
   void _showUserProfile(Map<String, dynamic> user) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -350,7 +354,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
       builder: (context) => Container(
         height: 70.h,
         decoration: BoxDecoration(
-          color: AppTheme.lightTheme.colorScheme.surface,
+          color: theme.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -360,12 +364,12 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
               height: 0.5.h,
               margin: EdgeInsets.symmetric(vertical: 2.h),
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                color: theme.colorScheme.onSurfaceVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             Expanded(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: EdgeInsets.all(4.w),
                 child: Column(
                   children: [
@@ -375,7 +379,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: AppTheme.lightTheme.colorScheme.primary,
+                          color: theme.colorScheme.primary,
                           width: 3,
                         ),
                       ),
@@ -395,7 +399,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
                       style: GoogleFonts.poppins(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.lightTheme.colorScheme.onSurface,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     SizedBox(height: 1.h),
@@ -404,7 +408,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -418,7 +422,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
                             },
                             icon: CustomIconWidget(
                               iconName: 'message',
-                              color: AppTheme.lightTheme.colorScheme.onPrimary,
+                              color: theme.colorScheme.onPrimary,
                               size: 18,
                             ),
                             label: const Text('Message'),
@@ -433,7 +437,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
                             },
                             icon: CustomIconWidget(
                               iconName: 'sports_martial_arts',
-                              color: AppTheme.lightTheme.colorScheme.primary,
+                              color: theme.colorScheme.primary,
                               size: 18,
                             ),
                             label: const Text('Challenge'),
@@ -453,26 +457,29 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
 
   void _sendMessage(Map<String, dynamic> user) {
     HapticFeedback.lightImpact();
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Opening chat with ${user["username"]}...'),
-        backgroundColor: AppTheme.lightTheme.colorScheme.secondary,
+        backgroundColor: theme.colorScheme.secondary,
       ),
     );
   }
 
   void _sendChallenge(Map<String, dynamic> user) {
     HapticFeedback.lightImpact();
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Challenge sent to ${user["username"]}!'),
-        backgroundColor: AppTheme.lightTheme.colorScheme.tertiary,
+        backgroundColor: theme.colorScheme.tertiary,
       ),
     );
   }
 
   void _addFriends() {
     HapticFeedback.lightImpact();
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -480,7 +487,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
       builder: (context) => Container(
         height: 60.h,
         decoration: BoxDecoration(
-          color: AppTheme.lightTheme.colorScheme.surface,
+          color: theme.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -490,74 +497,76 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
               height: 0.5.h,
               margin: EdgeInsets.symmetric(vertical: 2.h),
               decoration: BoxDecoration(
-                color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                color: theme.colorScheme.onSurfaceVariant,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(4.w),
-              child: Column(
-                children: [
-                  Text(
-                    'Add Friends',
-                    style: GoogleFonts.poppins(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.lightTheme.colorScheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search by username or email',
-                      prefixIcon: CustomIconWidget(
-                        iconName: 'search',
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                        size: 20,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(4.w),
+                child: Column(
+                  children: [
+                    Text(
+                      'Add Friends',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Opening contacts...')),
-                            );
-                          },
-                          icon: CustomIconWidget(
-                            iconName: 'contacts',
-                            color: AppTheme.lightTheme.colorScheme.primary,
-                            size: 18,
-                          ),
-                          label: const Text('From Contacts'),
+                    SizedBox(height: 4.h),
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search by username or email',
+                        prefixIcon: CustomIconWidget(
+                          iconName: 'search',
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 20,
                         ),
                       ),
-                      SizedBox(width: 4.w),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Sharing invite link...')),
-                            );
-                          },
-                          icon: CustomIconWidget(
-                            iconName: 'share',
-                            color: AppTheme.lightTheme.colorScheme.primary,
-                            size: 18,
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Opening contacts...')),
+                              );
+                            },
+                            icon: CustomIconWidget(
+                              iconName: 'contacts',
+                              color: theme.colorScheme.primary,
+                              size: 18,
+                            ),
+                            label: const Text('From Contacts'),
                           ),
-                          label: const Text('Invite'),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        SizedBox(width: 4.w),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Sharing invite link...')),
+                              );
+                            },
+                            icon: CustomIconWidget(
+                              iconName: 'share',
+                              color: theme.colorScheme.primary,
+                              size: 18,
+                            ),
+                            label: const Text('Invite'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -568,10 +577,11 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
 
   void _viewTeamDetails(Map<String, dynamic> team) {
     HapticFeedback.lightImpact();
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Opening ${team["name"]} details...'),
-        backgroundColor: AppTheme.lightTheme.colorScheme.primary,
+        backgroundColor: theme.colorScheme.primary,
       ),
     );
   }
@@ -652,6 +662,24 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (_isLoading || _currentUser == null) {
+      return Scaffold(
+        appBar: const CustomAppBar(
+          title: 'Leaderboard',
+          variant: CustomAppBarVariant.social,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+        bottomNavigationBar: CustomBottomBar(
+          currentIndex: _currentBottomIndex,
+          onTap: (index) {
+            setState(() {
+              _currentBottomIndex = index;
+            });
+          },
+        ),
+      );
+    }
     return Scaffold(
       appBar: const CustomAppBar(
         title: 'Leaderboard',
@@ -660,7 +688,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
       body: Column(
         children: [
           // User's current rank card
-          UserRankCard(userData: _currentUser),
+          UserRankCard(userData: _currentUser!),
 
           // Tab bar
           LeaderboardTabBar(
@@ -672,7 +700,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshData,
-              color: AppTheme.lightTheme.colorScheme.primary,
+              color: theme.colorScheme.primary,
               child: TabBarView(
                 controller: _tabController,
                 children: [
@@ -693,7 +721,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
                   onPressed: _addFriends,
                   child: CustomIconWidget(
                     iconName: 'person_add',
-                    color: AppTheme.lightTheme.colorScheme.onTertiary,
+                    color: theme.colorScheme.onTertiary,
                     size: 24,
                   ),
                 )

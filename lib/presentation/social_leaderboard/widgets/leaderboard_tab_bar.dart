@@ -15,39 +15,61 @@ class LeaderboardTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+      padding: EdgeInsets.all(1.w),
       decoration: BoxDecoration(
-        color: AppTheme.lightTheme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.lightTheme.shadowColor,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: TabBar(
         controller: tabController,
-        tabs: tabs.map((tab) => Tab(text: tab)).toList(),
+        tabs: tabs
+            .map((tab) => Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(_getTabEmoji(tab), style: const TextStyle(fontSize: 14)),
+                      SizedBox(width: 1.5.w),
+                      Text(tab),
+                    ],
+                  ),
+                ))
+            .toList(),
         indicator: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: AppTheme.lightTheme.colorScheme.primary,
+          borderRadius: BorderRadius.circular(12),
+          color: theme.colorScheme.primary,
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        labelColor: AppTheme.lightTheme.colorScheme.onPrimary,
-        unselectedLabelColor: AppTheme.lightTheme.colorScheme.onSurface,
+        labelColor: theme.colorScheme.onPrimary,
+        unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
         labelStyle: GoogleFonts.poppins(
-          fontSize: 14.sp,
+          fontSize: 13.sp,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: GoogleFonts.poppins(
-          fontSize: 14.sp,
+          fontSize: 13.sp,
           fontWeight: FontWeight.w400,
         ),
       ),
     );
+  }
+
+  String _getTabEmoji(String tab) {
+    switch (tab) {
+      case 'Friends': return '👥';
+      case 'Global': return '🌍';
+      case 'Teams': return '⚔️';
+      default: return '';
+    }
   }
 }

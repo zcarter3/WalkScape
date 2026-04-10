@@ -8,10 +8,7 @@ class CustomIconWidget extends StatelessWidget {
   const CustomIconWidget(
       {super.key, required this.iconName, this.size = 24, this.color});
 
-  @override
-  Widget build(BuildContext context) {
-    // Map of available icons
-    final Map<String, IconData> iconMap = {
+  static const Map<String, IconData> _iconMap = {
       // A
       'abc': Icons.abc,
       'ac_unit': Icons.ac_unit,
@@ -2167,10 +2164,12 @@ class CustomIconWidget extends StatelessWidget {
       'zoom_out_map': Icons.zoom_out_map,
     };
 
+    @override
+    Widget build(BuildContext context) {
     // Check if the icon exists
-    if (iconMap.containsKey(iconName)) {
+    if (_iconMap.containsKey(iconName)) {
       return Icon(
-        iconMap[iconName],
+        _iconMap[iconName],
         size: size,
         color: color,
         semanticLabel: iconName,

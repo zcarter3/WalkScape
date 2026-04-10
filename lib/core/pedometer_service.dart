@@ -1,8 +1,13 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:pedometer/pedometer.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// Only import native pedometer/permission packages on non-web platforms.
+// These packages use platform channels that are unavailable on web and
+// will cause a white screen / MissingPluginException if compiled into a
+// web build.
+import 'pedometer_native.dart' if (dart.library.html) 'pedometer_web_stub.dart'
+    as native_pedometer;
 
 /// Service that wraps the platform's hardware step counter.
 ///
@@ -23,7 +28,7 @@ class PedometerService {
   static const String _keyStepHistory = 'pedometer_step_history';
   static const String _keyUnlockedAchievements = 'pedometer_unlocked_achievements';
 
-  StreamSubscription<StepCount>? _subscription;
+  StreamSubscription<dynamic>? _subscription;
   final StreamController<int> _stepsController =
       StreamController<int>.broadcast();
 
@@ -90,10 +95,8 @@ class PedometerService {
 
   /// Request permission and start listening to the hardware step counter.
   Future<void> _startListening(SharedPreferences prefs) async {
-    // Request ACTIVITY_RECOGNITION on Android (no-op on iOS < 10,
-    // or auto-granted on iOS via Info.plist).
-    final status = await Permission.activityRecognition.request();
-    if (!status.isGranted) {
+    final permissionGranted = await native_pedometer.requestActivityPermission();
+    if (!permissionGranted) {
       debugPrint('PedometerService: activity recognition permission denied');
       _permissionDenied = true;
       _sensorAvailable = false;
@@ -103,13 +106,12 @@ class PedometerService {
 
     try {
       _subscription?.cancel();
-      _subscription = Pedometer.stepCountStream.listen(
-        (StepCount event) => _onStepCount(event, prefs),
+      _subscription = native_pedometer.listenToStepCount(
+        onStep: (int steps) => _onStepCount(steps, prefs),
         onError: (error) {
           debugPrint('PedometerService: sensor error — $error');
           _sensorAvailable = false;
         },
-        cancelOnError: false,
       );
       _sensorAvailable = true;
     } catch (e) {
@@ -118,8 +120,7 @@ class PedometerService {
     }
   }
 
-  void _onStepCount(StepCount event, SharedPreferences prefs) {
-    final raw = event.steps; // cumulative since boot
+  void _onStepCount(int raw, SharedPreferences prefs) {
     final today = _dateKey(DateTime.now());
     final storedDate = prefs.getString(_keyBaselineDate) ?? '';
 
@@ -204,6 +205,7 @@ class PedometerService {
   }
 
   /// Force a re-read from persisted state (e.g. after returning from background).
+  /// Also re-subscribes the sensor stream if it was lost.
   Future<void> refresh() async {
     final prefs = await SharedPreferences.getInstance();
     final storedDate = prefs.getString(_keyBaselineDate) ?? '';
@@ -222,6 +224,12 @@ class PedometerService {
       prefs.setInt(_keyTodaySteps, 0);
       prefs.setInt(_keyManualSteps, 0);
       prefs.setInt(_keyBaseline, 0);
+    }
+
+    // Re-subscribe to the hardware sensor if the subscription was lost
+    // (e.g. OS killed the listener while backgrounded).
+    if (!kIsWeb && _sensorAvailable && _subscription == null) {
+      await _startListening(prefs);
     }
 
     _stepsController.add(todaySteps);

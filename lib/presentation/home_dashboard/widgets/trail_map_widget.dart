@@ -313,8 +313,8 @@ class _TrailMapWidgetState extends State<TrailMapWidget>
       padding: EdgeInsets.symmetric(vertical: 1.h),
       child: Row(
         children: [
-          CustomIconWidget(
-            iconName: icon.toString().split('.').last,
+          Icon(
+            icon,
             color: theme.colorScheme.primary,
             size: 5.w,
           ),

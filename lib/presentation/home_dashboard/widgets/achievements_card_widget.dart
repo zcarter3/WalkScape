@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
-import '../../../widgets/custom_icon_widget.dart';
 
 class AchievementsCardWidget extends StatelessWidget {
   final List<Map<String, dynamic>> todayAchievements;
@@ -39,21 +38,26 @@ class AchievementsCardWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  CustomIconWidget(
-                    iconName: 'emoji_events',
-                    color: theme.colorScheme.tertiary,
-                    size: 6.w,
-                  ),
-                  SizedBox(width: 2.w),
-                  Text(
-                    'Today\'s Achievements',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+              Expanded(
+                child: Row(
+                  children: [
+                    CustomIconWidget(
+                      iconName: 'emoji_events',
+                      color: theme.colorScheme.tertiary,
+                      size: 6.w,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 2.w),
+                    Flexible(
+                      child: Text(
+                        'Today\'s Achievements',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(
@@ -178,11 +182,11 @@ class AchievementsCardWidget extends StatelessWidget {
             width: 12.w,
             height: 12.w,
             decoration: BoxDecoration(
-              color: _getBadgeColor(achievement['type'] as String, theme),
+              color: _getBadgeColor(achievement['type'] as String? ?? '', theme),
               borderRadius: BorderRadius.circular(8),
             ),
             child: CustomIconWidget(
-              iconName: _getBadgeIcon(achievement['type'] as String),
+              iconName: _getBadgeIcon(achievement['type'] as String? ?? ''),
               color: theme.colorScheme.surface,
               size: 6.w,
             ),
@@ -193,13 +197,13 @@ class AchievementsCardWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  achievement['title'] as String,
+                  achievement['title'] as String? ?? '',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  achievement['description'] as String,
+                  achievement['description'] as String? ?? '',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -218,7 +222,7 @@ class AchievementsCardWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                achievement['time'] as String,
+                achievement['time'] as String? ?? '',
                 style: theme.textTheme.labelSmall?.copyWith(
                   color:
                       theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),

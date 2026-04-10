@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
-import '../../../widgets/custom_icon_widget.dart';
 
 class GreetingHeaderWidget extends StatelessWidget {
   final String userName;
   final String currentDate;
   final String weatherCondition;
+  final int? temperatureF;
+  final String? city;
 
   const GreetingHeaderWidget({
     super.key,
     required this.userName,
     required this.currentDate,
     required this.weatherCondition,
+    this.temperatureF,
+    this.city,
   });
 
   @override
@@ -83,7 +86,9 @@ class GreetingHeaderWidget extends StatelessWidget {
                     ),
                     SizedBox(width: 2.w),
                     Text(
-                      weatherCondition,
+                      temperatureF != null
+                          ? '$weatherCondition $temperatureF°F'
+                          : weatherCondition,
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w500,
                         color: theme.colorScheme.onSurface,

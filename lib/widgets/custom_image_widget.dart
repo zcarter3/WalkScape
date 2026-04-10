@@ -1,8 +1,7 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../core/app_export.dart';
 
 extension ImageTypeExtension on String {
   ImageType get imageType {
@@ -10,7 +9,7 @@ extension ImageTypeExtension on String {
       return ImageType.network;
     } else if (endsWith('.svg')) {
       return ImageType.svg;
-    } else if (startsWith('file: //')) {
+    } else if (startsWith('file://')) {
       return ImageType.file;
     } else {
       return ImageType.png;
@@ -20,7 +19,6 @@ extension ImageTypeExtension on String {
 
 enum ImageType { svg, png, network, file, unknown }
 
-// ignore_for_file: must_be_immutable
 class CustomImageWidget extends StatelessWidget {
   const CustomImageWidget({super.key, 
     this.imageUrl,
@@ -132,12 +130,24 @@ class CustomImageWidget extends StatelessWidget {
             ),
           );
         case ImageType.file:
-          return Image.file(
-            File(imageUrl!),
+          // File-based images are not supported on web; fall through to asset
+          if (!kIsWeb) {
+            return Image.network(
+              imageUrl!,
+              height: height,
+              width: width,
+              fit: fit ?? BoxFit.cover,
+              color: color,
+              semanticLabel: semanticLabel,
+              errorBuilder: (context, error, stackTrace) =>
+                  errorWidget ?? Image.asset(placeHolder, height: height, width: width, fit: fit ?? BoxFit.cover),
+            );
+          }
+          return Image.asset(
+            placeHolder,
             height: height,
             width: width,
             fit: fit ?? BoxFit.cover,
-            color: color,
             semanticLabel: semanticLabel,
           );
         case ImageType.network:
@@ -177,6 +187,6 @@ class CustomImageWidget extends StatelessWidget {
           );
       }
     }
-    return SizedBox();
+    return const SizedBox();
   }
 }

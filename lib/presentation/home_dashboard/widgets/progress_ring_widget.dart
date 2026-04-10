@@ -3,7 +3,6 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
-import '../../../widgets/custom_icon_widget.dart';
 
 class ProgressRingWidget extends StatefulWidget {
   final int currentSteps;
@@ -60,6 +59,27 @@ class _ProgressRingWidgetState extends State<ProgressRingWidget>
 
     _animationController.forward();
     _pulseController.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant ProgressRingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentSteps != widget.currentSteps ||
+        oldWidget.goalSteps != widget.goalSteps) {
+      final newTarget =
+          (widget.goalSteps > 0 ? widget.currentSteps / widget.goalSteps : 0.0)
+              .clamp(0.0, 1.0);
+      _progressAnimation = Tween<double>(
+        begin: _progressAnimation.value,
+        end: newTarget,
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ));
+      _animationController
+        ..reset()
+        ..forward();
+    }
   }
 
   @override
