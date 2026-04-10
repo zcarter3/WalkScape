@@ -1,19 +1,9 @@
-import 'package:sizer/sizer.dart';
 import 'package:flutter/material.dart';
-
-
+import 'package:sizer/sizer.dart';
 import '../../core/firebase_user_service.dart';
-
 
 class ProfileCreationScreen extends StatefulWidget {
 	const ProfileCreationScreen({super.key});
-
-	@override
-	import 'package:flutter/material.dart';
-	import 'package:sizer/sizer.dart';
-	import '../../core/firebase_user_service.dart';
-	@override
-	Widget build(BuildContext context) {
 
 	@override
 	State<ProfileCreationScreen> createState() => _ProfileCreationScreenState();
@@ -58,65 +48,9 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
 			'image': 'https://images.unsplash.com/photo-1687699875541-f073e9086676',
 			'name': 'Park Explorer'
 		},
-		import 'package:sizer/sizer.dart';
 	];
 
 	Future<void> _createProfile() async {
-		if (!_formKey.currentState!.validate()) return;
-
-		import 'package:flutter/material.dart';
-		import 'package:sizer/sizer.dart';
-		import '../../core/firebase_user_service.dart';
-
-		class ProfileCreationScreen extends StatefulWidget {
-			const ProfileCreationScreen({super.key});
-
-			@override
-			State<ProfileCreationScreen> createState() => _ProfileCreationScreenState();
-		}
-
-		class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
-			final _formKey = GlobalKey<FormState>();
-			final _usernameController = TextEditingController();
-			final _emailController = TextEditingController();
-			final _passwordController = TextEditingController();
-			bool _isLoading = false;
-			String? _errorMessage;
-			String _selectedAvatar = 'https://images.unsplash.com/photo-1705408115513-3ff15ef55a8d';
-			final List<Map<String, String>> _avatarOptions = [
-				{
-					'id': 'avatar_1',
-					'image': 'https://images.unsplash.com/photo-1705408115513-3ff15ef55a8d',
-					'name': 'Adventure Seeker'
-				},
-				{
-					'id': 'avatar_2',
-					'image': 'https://images.unsplash.com/photo-1587401095394-725003c9bea1',
-					'name': 'Fitness Warrior'
-				},
-				{
-					'id': 'avatar_3',
-					'image': 'https://images.unsplash.com/photo-1576921874520-1c3fa53f2674',
-					'name': 'Trail Runner'
-				},
-				{
-					'id': 'avatar_4',
-					'image': 'https://images.unsplash.com/photo-1680310381169-5ccb4b532517',
-					'name': 'Step Master'
-				},
-				{
-					'id': 'avatar_5',
-					'image': 'https://images.unsplash.com/photo-1696453685422-34d5c0ddd4c3',
-					'name': 'Mountain Walker'
-				},
-				{
-					'id': 'avatar_6',
-					'image': 'https://images.unsplash.com/photo-1687699875541-f073e9086676',
-					'name': 'Park Explorer'
-				},
-			];
-
-			Future<void> _createProfile() async {
 				if (!_formKey.currentState!.validate()) return;
 				setState(() {
 					_isLoading = true;
@@ -314,14 +248,4 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
 					),
 				);
 			}
-		}
-								),
-								SizedBox(height: 3.h),
-							],
-						),
-					),
-				),
-			),
-		);
-	}
 }
