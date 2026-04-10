@@ -1,7 +1,4 @@
-import 'dart:math';
-import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
-// import '../../core/app_export.dart';
+import '../../core/firebase_user_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,7 +7,6 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
   final List<Map<String, String>> _parkBackgrounds = [
     {
       'image': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
@@ -35,11 +31,35 @@ class _LoginScreenState extends State<LoginScreen> {
   ];
 
   late Map<String, String> _selectedPark;
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _selectedPark = _parkBackgrounds[Random().nextInt(_parkBackgrounds.length)];
+  }
+
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+    final service = FirebaseUserService();
+    final success = await service.authenticate(username, password);
+    setState(() => _isLoading = false);
+    if (success) {
+      // Navigate to dashboard
+      Navigator.pushReplacementNamed(context, '/home-dashboard');
+    } else {
+      setState(() {
+        _errorMessage = 'Invalid username or password.';
+      });
+    }
   }
 
   @override
@@ -86,57 +106,94 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           // Main content
           Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Spacer(flex: 3),
-                Text(
-                  'Welcome to WalkScape',
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    shadows: [Shadow(color: Colors.black45, blurRadius: 8)],
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  'Create a profile or log in to continue',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 7.h),
-                SizedBox(
-                  width: 70.w,
-                  height: 7.h,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pushReplacementNamed(context, '/profile-creation'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
-                      textStyle: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 6,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: 7.h),
+                  Text(
+                    'Welcome to WalkScape',
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      shadows: [Shadow(color: Colors.black45, blurRadius: 8)],
                     ),
-                    child: Text('Log In'),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                SizedBox(height: 2.5.h),
-                GestureDetector(
-                  onTap: () => Navigator.pushReplacementNamed(context, '/profile-creation'),
-                  child: Text(
-                    'New user? Create profile',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.95),
-                      fontWeight: FontWeight.w500,
-                      decoration: TextDecoration.underline,
+                  SizedBox(height: 2.h),
+                  Text(
+                    'Create a profile or log in to continue',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 4.h),
+                  Container(
+                    width: 80.w,
+                    padding: EdgeInsets.all(4.w),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _usernameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                            prefixIcon: Icon(Icons.person),
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                            prefixIcon: Icon(Icons.lock),
+                          ),
+                        ),
+                        if (_errorMessage != null) ...[
+                          SizedBox(height: 1.5.h),
+                          Text(_errorMessage!, style: TextStyle(color: Colors.red)),
+                        ],
+                        SizedBox(height: 3.h),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 6.h,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.colorScheme.primary,
+                              foregroundColor: theme.colorScheme.onPrimary,
+                              textStyle: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              elevation: 6,
+                            ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator()
+                                : const Text('Log In'),
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        GestureDetector(
+                          onTap: () => Navigator.pushReplacementNamed(context, '/profile-creation'),
+                          child: Text(
+                            'New user? Create profile',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w500,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Spacer(flex: 4),
-              ],
+                  SizedBox(height: 7.h),
+                ],
+              ),
             ),
           ),
         ],
