@@ -1,7 +1,17 @@
 import '../../core/firebase_user_service.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'dart:math';
+
+import '../../core/firebase_user_service.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
