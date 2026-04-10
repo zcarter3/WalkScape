@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import '../core/app_export.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'core/firebase_test_seed.dart';
 
 void main() async {
