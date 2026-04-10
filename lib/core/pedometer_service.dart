@@ -205,6 +205,7 @@ class PedometerService {
   }
 
   /// Force a re-read from persisted state (e.g. after returning from background).
+  /// Also re-subscribes the sensor stream if it was lost.
   Future<void> refresh() async {
     final prefs = await SharedPreferences.getInstance();
     final storedDate = prefs.getString(_keyBaselineDate) ?? '';
@@ -223,6 +224,12 @@ class PedometerService {
       prefs.setInt(_keyTodaySteps, 0);
       prefs.setInt(_keyManualSteps, 0);
       prefs.setInt(_keyBaseline, 0);
+    }
+
+    // Re-subscribe to the hardware sensor if the subscription was lost
+    // (e.g. OS killed the listener while backgrounded).
+    if (!kIsWeb && _sensorAvailable && _subscription == null) {
+      await _startListening(prefs);
     }
 
     _stepsController.add(todaySteps);

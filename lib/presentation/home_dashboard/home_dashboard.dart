@@ -25,7 +25,7 @@ class HomeDashboard extends StatefulWidget {
   State<HomeDashboard> createState() => _HomeDashboardState();
 }
 
-class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateMixin {
+class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateMixin, WidgetsBindingObserver {
   // --- Fields ---
   final String _questTitle = 'Walk 500 Steps';
   final String _questDescription = 'Take 500 steps today to complete your daily quest!';
@@ -44,6 +44,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
   Animation<double>? _fabAnimation;
   StreamSubscription<int>? _stepCountSubscription;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  Timer? _saveDebounce;
 
   final PedometerService _pedometer = PedometerService.instance;
   final WeatherService _weather = WeatherService.instance;
@@ -414,7 +415,9 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
     @override
     void initState() {
       super.initState();
+      WidgetsBinding.instance.addObserver(this);
       _fabAnimationController = AnimationController(
+        duration: const Duration(milliseconds: 400),
         vsync: this,
       );
       _fabAnimation = Tween<double>(
@@ -458,12 +461,25 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
           _questCompleted = true;
         }
       });
-      _saveSteps();
+      // Debounce disk writes — coalesce rapid step events into a single save.
+      _saveDebounce?.cancel();
+      _saveDebounce = Timer(const Duration(seconds: 2), _saveSteps);
       _checkAndUnlockStarterAchievements();
     }
 
     @override
+    void didChangeAppLifecycleState(AppLifecycleState state) {
+      if (state == AppLifecycleState.resumed) {
+        // App returned to foreground — pick up any steps taken while backgrounded.
+        _pedometer.refresh();
+        _updateStepsFromService(_pedometer.todaySteps);
+      }
+    }
+
+    @override
     void dispose() {
+      WidgetsBinding.instance.removeObserver(this);
+      _saveDebounce?.cancel();
       _fabAnimationController?.dispose();
       _stepCountSubscription?.cancel();
       super.dispose();
