@@ -245,8 +245,8 @@ class _TrophyCaseWidgetState extends State<TrophyCaseWidget> with SingleTickerPr
 
   Widget _buildShelves(BuildContext context, List<Map<String, dynamic>> trophies) {
     // Arrange trophies in up to 2 shelves, max 4 per shelf
-    final shelf1 = trophies.take(4).toList();
-    final shelf2 = trophies.length > 4 ? trophies.skip(4).take(4).toList() : [];
+    final shelf1 = trophies.take(4).toList().cast<Map<String, dynamic>>();
+    final shelf2 = trophies.length > 4 ? trophies.skip(4).take(4).toList().cast<Map<String, dynamic>>() : <Map<String, dynamic>>[];
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
