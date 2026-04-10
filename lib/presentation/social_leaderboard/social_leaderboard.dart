@@ -25,7 +25,8 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
   int _currentBottomIndex = 1;
 
   // Mock data for current user
-  late Map<String, dynamic> _currentUser;
+  Map<String, dynamic>? _currentUser;
+  bool _isLoading = true;
 
   // Mock data for friends leaderboard
   final List<Map<String, dynamic>> _friendsData = [
@@ -291,6 +292,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
         "xp": prefs.getInt('user_xp') ?? 0,
         "nextLevelXP": level * 1000, // Simple XP system
       };
+      _isLoading = false;
     });
   }
 
@@ -652,6 +654,23 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading || _currentUser == null) {
+      return Scaffold(
+        appBar: const CustomAppBar(
+          title: 'Leaderboard',
+          variant: CustomAppBarVariant.social,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+        bottomNavigationBar: CustomBottomBar(
+          currentIndex: _currentBottomIndex,
+          onTap: (index) {
+            setState(() {
+              _currentBottomIndex = index;
+            });
+          },
+        ),
+      );
+    }
     return Scaffold(
       appBar: const CustomAppBar(
         title: 'Leaderboard',
@@ -660,7 +679,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
       body: Column(
         children: [
           // User's current rank card
-          UserRankCard(userData: _currentUser),
+          UserRankCard(userData: _currentUser!),
 
           // Tab bar
           LeaderboardTabBar(

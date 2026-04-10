@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
-import 'dart:io';
 
 class ProfileHeaderWidget extends StatelessWidget {
   final Map<String, dynamic> userData;
@@ -57,12 +57,14 @@ class ProfileHeaderWidget extends StatelessWidget {
                     ],
                   ),
                   child: ClipOval(
-                    child: userData["avatarFilePath"] != null
-                        ? Image.file(
-                            File(userData["avatarFilePath"]),
+                    child: userData["avatarFilePath"] != null && !kIsWeb
+                        ? Image.network(
+                            userData["avatarFilePath"],
                             width: 25.w,
                             height: 25.w,
                             fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Icon(Icons.person, size: 25.w, color: theme.colorScheme.primary),
                           )
                         : Icon(Icons.person, size: 25.w, color: theme.colorScheme.primary),
                   ),

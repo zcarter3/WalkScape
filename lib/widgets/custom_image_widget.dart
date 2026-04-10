@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -132,12 +132,24 @@ class CustomImageWidget extends StatelessWidget {
             ),
           );
         case ImageType.file:
-          return Image.file(
-            File(imageUrl!),
+          // File-based images are not supported on web; fall through to asset
+          if (!kIsWeb) {
+            return Image.network(
+              imageUrl!,
+              height: height,
+              width: width,
+              fit: fit ?? BoxFit.cover,
+              color: color,
+              semanticLabel: semanticLabel,
+              errorBuilder: (context, error, stackTrace) =>
+                  errorWidget ?? Image.asset(placeHolder, height: height, width: width, fit: fit ?? BoxFit.cover),
+            );
+          }
+          return Image.asset(
+            placeHolder,
             height: height,
             width: width,
             fit: fit ?? BoxFit.cover,
-            color: color,
             semanticLabel: semanticLabel,
           );
         case ImageType.network:

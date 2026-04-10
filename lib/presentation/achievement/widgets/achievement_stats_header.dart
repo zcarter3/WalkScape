@@ -72,7 +72,9 @@ class AchievementStatsHeader extends StatelessWidget {
                 width: 25.w,
                 height: 25.w,
                 child: CircularProgressIndicator(
-                  value: earnedAchievements / totalAchievements,
+                  value: totalAchievements > 0
+                      ? earnedAchievements / totalAchievements
+                      : 0.0,
                   strokeWidth: 1.w,
                   backgroundColor:
                       theme.colorScheme.outline.withValues(alpha: 0.2),

@@ -16,8 +16,10 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    // DEV ONLY: Seed test profiles (comment out in prod)
-    await seedTestProfiles();
+    // DEV ONLY: Seed test profiles only in debug mode
+    if (kDebugMode) {
+      await seedTestProfiles();
+    }
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
   }

@@ -3,7 +3,6 @@ import 'package:sizer/sizer.dart';
 
 
 import '../../../core/app_export.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class AvatarCustomizationModal extends StatefulWidget {
@@ -24,7 +23,7 @@ class AvatarCustomizationModal extends StatefulWidget {
 class _AvatarCustomizationModalState extends State<AvatarCustomizationModal>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  File? _selectedAvatarFile;
+  String? _selectedAvatarPath;
   String selectedTheme = '';
 
   final ImagePicker _picker = ImagePicker();
@@ -74,7 +73,7 @@ class _AvatarCustomizationModalState extends State<AvatarCustomizationModal>
     selectedTheme = widget.userData["currentThemeId"] as String? ?? "forest_trail";
     // Load existing avatar if present
     if (widget.userData["avatarFilePath"] != null) {
-      _selectedAvatarFile = File(widget.userData["avatarFilePath"]);
+      _selectedAvatarPath = widget.userData["avatarFilePath"] as String;
     }
   }
 
@@ -168,10 +167,10 @@ class _AvatarCustomizationModalState extends State<AvatarCustomizationModal>
       padding: EdgeInsets.all(4.w),
       child: Column(
         children: [
-          _selectedAvatarFile != null
+          _selectedAvatarPath != null
               ? CircleAvatar(
                   radius: 48,
-                  backgroundImage: FileImage(_selectedAvatarFile!),
+                  backgroundImage: NetworkImage(_selectedAvatarPath!),
                 )
               : CircleAvatar(
                   radius: 48,
@@ -186,7 +185,7 @@ class _AvatarCustomizationModalState extends State<AvatarCustomizationModal>
               final picked = await _picker.pickImage(source: ImageSource.gallery);
               if (picked != null) {
                 setState(() {
-                  _selectedAvatarFile = File(picked.path);
+                  _selectedAvatarPath = picked.path;
                 });
               }
             },
@@ -327,7 +326,7 @@ class _AvatarCustomizationModalState extends State<AvatarCustomizationModal>
     );
     final updatedData = {
       ...widget.userData,
-      if (_selectedAvatarFile != null) "avatarFilePath": _selectedAvatarFile!.path,
+      if (_selectedAvatarPath != null) "avatarFilePath": _selectedAvatarPath!,
       "currentThemeId": selectedTheme,
       "currentThemeName": selectedThemeData["name"],
     };

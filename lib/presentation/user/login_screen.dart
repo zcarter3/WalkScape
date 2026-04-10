@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 import '../../core/firebase_user_service.dart';
 
@@ -57,6 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final success = await service.authenticate(username, password);
     setState(() => _isLoading = false);
     if (success) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('profile_created', true);
+      await prefs.setString('user_username', username);
       Navigator.pushReplacementNamed(context, '/home-dashboard');
     } else {
       setState(() {

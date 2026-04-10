@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/firebase_user_service.dart';
 
 class ProfileCreationScreen extends StatefulWidget {
@@ -69,6 +70,9 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
 					return;
 				}
 				await service.createUser(username, email, password);
+				final prefs = await SharedPreferences.getInstance();
+				await prefs.setBool('profile_created', true);
+				await prefs.setString('user_username', username);
 				setState(() => _isLoading = false);
 				Navigator.pushReplacementNamed(context, '/home-dashboard');
 			}
