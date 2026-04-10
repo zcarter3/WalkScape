@@ -19,7 +19,7 @@ FirebaseDatabase database = FirebaseDatabase.instance;*/
   // Check if profile is created
   final prefs = await SharedPreferences.getInstance();
   final profileCreated = prefs.getBool('profile_created') ?? false;
-  final initialRoute = profileCreated ? homeDashboard : profileCreation;
+  final initialRoute = profileCreated ? homeDashboard : loginScreen;
 
   // No error widget logic
 

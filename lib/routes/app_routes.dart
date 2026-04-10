@@ -5,6 +5,7 @@ import '../presentation/home_dashboard/home_dashboard.dart';
 import '../presentation/user/user_profile.dart';
 import '../presentation/user/profile_creation_screen.dart';
 import '../presentation/social_leaderboard/social_leaderboard.dart';
+import '../presentation/user/login_screen.dart';
 
 
 const String homeRoute = '/home';
@@ -17,6 +18,7 @@ const String homeDashboard = '/home-dashboard';
 const String userProfile = '/user-profile';
 const String profileCreation = '/profile-creation';
 const String socialLeaderboard = '/social-leaderboard';
+const String loginScreen = '/login';
 
 final Map<String, WidgetBuilder> routes = {
   initial: (context) => const HomeDashboard(),
@@ -26,5 +28,6 @@ final Map<String, WidgetBuilder> routes = {
   userProfile: (context) => const UserProfile(),
   profileCreation: (context) => const ProfileCreationScreen(),
   socialLeaderboard: (context) => const SocialLeaderboard(),
+  loginScreen: (context) => const LoginScreen(),
   // Add more routes as needed
 };
