@@ -1,4 +1,6 @@
-{
+
+
+ {
 	"inputs": [
 		{
 			"id": "api_key",
@@ -7,19 +9,5 @@
 			"password": true
 		}
 	],
-	"servers": {
-		"firecrawl/firecrawl-mcp-server": {
-			"type": "stdio",
-			"command": "npx",
-			"args": [
-				"-y",
-				"firecrawl-mcp@latest"
-			],
-			"env": {
-				"FIRECRAWL_API_KEY": "${input:api_key}"
-			},
-			"gallery": "https://api.mcp.github.com",
-			"version": "1.0.0"
-		}
-	}
-}
+	"servers": {}
+} 
