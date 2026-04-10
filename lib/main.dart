@@ -4,26 +4,19 @@ import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_export.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'core/firebase_test_seed.dart';
 
 void main() async {
-  
-  
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  // DEV ONLY: Seed test profiles (comment out in prod)
+  await seedTestProfiles();
 
-   /* await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
-
-FirebaseDatabase database = FirebaseDatabase.instance;*/
-
-  // Check if profile is created
   final prefs = await SharedPreferences.getInstance();
   final profileCreated = prefs.getBool('profile_created') ?? false;
   final initialRoute = profileCreated ? homeDashboard : loginScreen;
 
-  // No error widget logic
-
-  // Device orientation lock
   Future.wait([
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
   ]).then((value) {

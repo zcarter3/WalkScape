@@ -6,7 +6,13 @@ class ProfileCreationScreen extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
-			appBar: AppBar(title: const Text('Create Profile')),
+			appBar: AppBar(
+				title: const Text('Create Profile'),
+				leading: IconButton(
+					icon: const Icon(Icons.arrow_back),
+					onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+				),
+			),
 			body: const Center(
 				child: Text('Profile creation coming soon!'),
 			),
