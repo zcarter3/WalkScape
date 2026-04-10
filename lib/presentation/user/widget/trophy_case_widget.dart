@@ -57,7 +57,7 @@ class _TrophyCaseWidgetState extends State<TrophyCaseWidget> with SingleTickerPr
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final earned = widget.achievements.where((a) => a['isEarned'] == true).toList();
-    final locked = widget.achievements.where((a) => a['isEarned'] != true).toList();
+    final _ = widget.achievements.where((a) => a['isEarned'] != true).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
