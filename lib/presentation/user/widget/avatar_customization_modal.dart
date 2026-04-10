@@ -174,7 +174,7 @@ class _AvatarCustomizationModalState extends State<AvatarCustomizationModal>
                 )
               : CircleAvatar(
                   radius: 48,
-                  backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+                  backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
                   child: Icon(Icons.person, size: 48, color: theme.colorScheme.primary),
                 ),
           SizedBox(height: 16),

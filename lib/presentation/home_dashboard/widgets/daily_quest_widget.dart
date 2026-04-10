@@ -27,12 +27,12 @@ class DailyQuestWidget extends StatelessWidget {
         padding: EdgeInsets.all(4.w),
         decoration: BoxDecoration(
           color: isCompleted
-              ? theme.colorScheme.secondary.withOpacity(0.15)
+              ? theme.colorScheme.secondary.withValues(alpha: 0.15)
               : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: theme.shadowColor.withOpacity(0.08),
+              color: theme.shadowColor.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -40,7 +40,7 @@ class DailyQuestWidget extends StatelessWidget {
           border: Border.all(
             color: isCompleted
                 ? theme.colorScheme.secondary
-                : theme.colorScheme.primary.withOpacity(0.15),
+                : theme.colorScheme.primary.withValues(alpha: 0.15),
             width: 2,
           ),
         ),
@@ -71,7 +71,7 @@ class DailyQuestWidget extends StatelessWidget {
                   Text(
                     questDescription,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                 ],

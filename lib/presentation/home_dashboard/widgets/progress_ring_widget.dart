@@ -3,7 +3,6 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
-import '../../../widgets/custom_icon_widget.dart';
 
 class ProgressRingWidget extends StatefulWidget {
   final int currentSteps;

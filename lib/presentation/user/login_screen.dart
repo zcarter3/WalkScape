@@ -47,6 +47,13 @@ class _LoginScreenState extends State<LoginScreen> {
     _selectedPark = _parkBackgrounds[Random().nextInt(_parkBackgrounds.length)];
   }
 
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   Future<void> _login() async {
     setState(() {
       _isLoading = true;
@@ -79,14 +86,14 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Image.network(
               _selectedPark['image']!,
               fit: BoxFit.cover,
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               colorBlendMode: BlendMode.darken,
               loadingBuilder: (context, child, progress) =>
                   progress == null ? child : const Center(child: CircularProgressIndicator()),
             ),
           ),
           Container(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
           ),
           Positioned(
             top: 7.h,
@@ -96,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.5.h),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.45),
+                  color: Colors.black.withValues(alpha: 0.45),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
@@ -121,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: theme.textTheme.displaySmall?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      shadows: [Shadow(color: Colors.black45, blurRadius: 8)],
+                      shadows: [const Shadow(color: Colors.black45, blurRadius: 8)],
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -129,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Create a profile or log in to continue',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -138,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 80.w,
                     padding: EdgeInsets.all(4.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.85),
+                      color: Colors.white.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Column(

@@ -108,7 +108,7 @@ class _TrophyCaseWidgetState extends State<TrophyCaseWidget> with SingleTickerPr
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.brown.withOpacity(0.3),
+                            color: Colors.brown.withValues(alpha: 0.3),
                             blurRadius: 16,
                             offset: const Offset(0, 8),
                           ),
@@ -135,7 +135,7 @@ class _TrophyCaseWidgetState extends State<TrophyCaseWidget> with SingleTickerPr
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.brown.withOpacity(0.2),
+                                color: Colors.brown.withValues(alpha: 0.2),
                                 blurRadius: 8,
                                 offset: const Offset(2, 4),
                               ),
@@ -163,7 +163,7 @@ class _TrophyCaseWidgetState extends State<TrophyCaseWidget> with SingleTickerPr
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.brown.withOpacity(0.2),
+                                color: Colors.brown.withValues(alpha: 0.2),
                                 blurRadius: 8,
                                 offset: const Offset(-2, 4),
                               ),
@@ -206,10 +206,10 @@ class _TrophyCaseWidgetState extends State<TrophyCaseWidget> with SingleTickerPr
                         child: Text(
                           'Tap to open',
                           style: theme.textTheme.labelLarge?.copyWith(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontWeight: FontWeight.bold,
                             shadows: [
-                              Shadow(color: Colors.black.withOpacity(0.3), blurRadius: 8),
+                              Shadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8),
                             ],
                           ),
                         ),
@@ -274,11 +274,11 @@ class _TrophyCaseWidgetState extends State<TrophyCaseWidget> with SingleTickerPr
             height: 10.h,
             margin: EdgeInsets.symmetric(horizontal: 1.w),
             decoration: BoxDecoration(
-              color: Colors.brown.shade200.withOpacity(0.7),
+              color: Colors.brown.shade200.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.brown.withOpacity(0.18),
+                  color: Colors.brown.withValues(alpha: 0.18),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -356,7 +356,7 @@ class _TrophyCaseWidgetState extends State<TrophyCaseWidget> with SingleTickerPr
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
                   decoration: BoxDecoration(
-                    color: _getRarityColor(trophy['rarity'] as String).withOpacity(0.15),
+                    color: _getRarityColor(trophy['rarity'] as String).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(

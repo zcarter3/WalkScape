@@ -5,7 +5,6 @@ import 'package:sizer/sizer.dart';
 import '../../core/app_export.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_bottom_bar.dart';
-import '../../widgets/custom_icon_widget.dart';
 import './widgets/achievement_card.dart';
 import './widgets/achievement_detail_modal.dart';
 import './widgets/achievement_filter_chips.dart';

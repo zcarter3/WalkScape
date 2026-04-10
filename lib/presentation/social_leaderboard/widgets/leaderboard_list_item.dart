@@ -36,8 +36,8 @@ class LeaderboardListItem extends StatelessWidget {
         gradient: isTop3
             ? LinearGradient(
                 colors: [
-                  rankColor.withOpacity(0.15),
-                  rankColor.withOpacity(0.04),
+                  rankColor.withValues(alpha: 0.15),
+                  rankColor.withValues(alpha: 0.04),
                 ],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
@@ -46,19 +46,19 @@ class LeaderboardListItem extends StatelessWidget {
         color: isTop3 ? null : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isTop3 ? rankColor.withOpacity(0.4) : theme.colorScheme.outline.withOpacity(0.1),
+          color: isTop3 ? rankColor.withValues(alpha: 0.4) : theme.colorScheme.outline.withValues(alpha: 0.1),
           width: isTop3 ? 2 : 1,
         ),
         boxShadow: [
           if (isTop3)
             BoxShadow(
-              color: rankColor.withOpacity(0.18),
+              color: rankColor.withValues(alpha: 0.18),
               blurRadius: 12,
               offset: const Offset(0, 4),
             )
           else
             BoxShadow(
-              color: theme.shadowColor.withOpacity(0.06),
+              color: theme.shadowColor.withValues(alpha: 0.06),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -79,7 +79,7 @@ class LeaderboardListItem extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: isTop3
                       ? LinearGradient(
-                          colors: [rankColor, rankColor.withOpacity(0.7)],
+                          colors: [rankColor, rankColor.withValues(alpha: 0.7)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         )
@@ -169,7 +169,7 @@ class LeaderboardListItem extends StatelessWidget {
                             child: Container(
                               padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.2.h),
                               decoration: BoxDecoration(
-                                color: rankColor.withOpacity(0.12),
+                                color: rankColor.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(

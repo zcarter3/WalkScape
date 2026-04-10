@@ -13,8 +13,9 @@ class CustomErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -31,10 +32,8 @@ class CustomErrorWidget extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   "Something went wrong",
-                  style: const TextStyle(
-                    fontSize: 24,
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF262626),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -44,9 +43,8 @@ class CustomErrorWidget extends StatelessWidget {
                         errorDetails?.exceptionAsString() ??
                         'We encountered an unexpected error while processing your request.',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF525252), // neutral-600
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                 ),
@@ -57,7 +55,7 @@ class CustomErrorWidget extends StatelessWidget {
                       scrollDirection: Axis.vertical,
                       child: Text(
                         errorDetails!.stack.toString(),
-                        style: const TextStyle(fontSize: 10, color: Colors.red),
+                        style: TextStyle(fontSize: 10, color: theme.colorScheme.error),
                         maxLines: 8,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -73,11 +71,11 @@ class CustomErrorWidget extends StatelessWidget {
                       Navigator.pushNamed(context, '/');
                     }
                   },
-                  icon: const Icon(Icons.arrow_back, size: 18, color: Colors.white),
+                  icon: Icon(Icons.arrow_back, size: 18, color: theme.colorScheme.onPrimary),
                   label: const Text('Back'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),

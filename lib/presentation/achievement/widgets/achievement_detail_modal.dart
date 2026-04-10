@@ -2,40 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 import '../../../core/app_export.dart';
-
-String getAchievementEmoji(String category) {
-  switch (category.toLowerCase()) {
-    case 'steps':
-      return '👣';
-    case 'streaks':
-      return '🔥';
-    case 'trails':
-      return '⛰️';
-    case 'social':
-      return '🤝';
-    case 'events':
-      return '🎊';
-    default:
-      return '🏅';
-  }
-}
-
-String getMotivationalMessage(String category) {
-  switch (category.toLowerCase()) {
-    case 'steps':
-      return 'Every step brings you closer!';
-    case 'streaks':
-      return 'Keep your streak alive!';
-    case 'trails':
-      return 'Adventure is just ahead!';
-    case 'social':
-      return 'Invite friends for more fun!';
-    case 'events':
-      return 'Special event, special you!';
-    default:
-      return 'You are closer than you think!';
-  }
-}
+import '../../../core/achievement_utils.dart';
 
 class AchievementDetailModal extends StatelessWidget {
   final Map<String, dynamic> achievement;
@@ -149,7 +116,7 @@ class AchievementDetailModal extends StatelessWidget {
           if (achievement['requirement'] != null) ...[
             SizedBox(height: 1.h),
             Text(
-              achievement['requirement'] as String,
+              achievement['requirement'] as String? ?? '',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
@@ -184,7 +151,7 @@ class AchievementDetailModal extends StatelessWidget {
             _buildStatRow(
               context,
               'Unlocked',
-              _formatFullDate(achievement['unlockedDate'] as DateTime),
+              _formatFullDate(achievement['unlockedDate'] as DateTime? ?? DateTime.now()),
             ),
           if (stats['stepsWhenEarned'] != null)
             _buildStatRow(
@@ -206,9 +173,10 @@ class AchievementDetailModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isEarned = achievement['isEarned'] as bool;
+    final isEarned = achievement['isEarned'] as bool? ?? false;
     final progress = achievement['progress'] as double? ?? 0.0;
-    final emoji = getAchievementEmoji(achievement['category'] as String);
+    final category = achievement['category'] as String? ?? '';
+    final emoji = getAchievementEmoji(category);
     return Stack(
       children: [
         Container(
@@ -260,15 +228,15 @@ class AchievementDetailModal extends StatelessWidget {
                                 alignment: Alignment.center,
                                 children: [
                                   CustomImageWidget(
-                                    imageUrl: achievement['badgeImage'] as String,
+                                    imageUrl: achievement['badgeImage'] as String? ?? '',
                                     width: 25.w,
                                     height: 25.w,
                                     fit: BoxFit.contain,
-                                    semanticLabel: achievement['semanticLabel'] as String,
+                                    semanticLabel: achievement['semanticLabel'] as String? ?? '',
                                   ),
                                   if ((achievement['justUnlocked'] ?? false))
                                     Positioned(
-                                      child: Text('🎉', style: TextStyle(fontSize: 40)),
+                                      child: const Text('🎉', style: TextStyle(fontSize: 40)),
                                     ),
                                 ],
                               )
@@ -282,7 +250,7 @@ class AchievementDetailModal extends StatelessWidget {
                                   SizedBox(height: 1.h),
                                   Text(
                                     emoji,
-                                    style: TextStyle(fontSize: 28),
+                                    style: const TextStyle(fontSize: 28),
                                   ),
                                 ],
                               ),
@@ -292,11 +260,11 @@ class AchievementDetailModal extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(emoji, style: TextStyle(fontSize: 22)),
+                          Text(emoji, style: const TextStyle(fontSize: 22)),
                           SizedBox(width: 1.w),
                           Flexible(
                             child: Text(
-                              achievement['title'] as String,
+                              achievement['title'] as String? ?? '',
                               style: theme.textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: isEarned
@@ -317,16 +285,14 @@ class AchievementDetailModal extends StatelessWidget {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 3.w, vertical: 1.h),
                             decoration: BoxDecoration(
-                                color: _getCategoryColor(
-                                    achievement['category'] as String, theme)
+                                color: _getCategoryColor(category, theme)
                                   .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
-                              achievement['category'] as String,
+                              category,
                               style: theme.textTheme.labelMedium?.copyWith(
-                                color: _getCategoryColor(
-                                    achievement['category'] as String, theme),
+                                color: _getCategoryColor(category, theme),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -338,7 +304,7 @@ class AchievementDetailModal extends StatelessWidget {
                                   horizontal: 3.w, vertical: 1.h),
                               decoration: BoxDecoration(
                                 color: _getRarityColor(
-                                    achievement['rarity'] as String, theme)
+                                    achievement['rarity'] as String? ?? '', theme)
                                   .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -349,14 +315,14 @@ class AchievementDetailModal extends StatelessWidget {
                                     iconName: 'star',
                                     size: 3.w,
                                     color: _getRarityColor(
-                                        achievement['rarity'] as String, theme),
+                                        achievement['rarity'] as String? ?? '', theme),
                                   ),
                                   SizedBox(width: 1.w),
                                   Text(
-                                    (achievement['rarity'] as String).toUpperCase(),
+                                    (achievement['rarity'] as String? ?? '').toUpperCase(),
                                     style: theme.textTheme.labelSmall?.copyWith(
                                       color: _getRarityColor(
-                                          achievement['rarity'] as String, theme),
+                                          achievement['rarity'] as String? ?? '', theme),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -375,7 +341,7 @@ class AchievementDetailModal extends StatelessWidget {
                       SizedBox(height: 3.h),
                       // Motivational Message
                       Text(
-                        getMotivationalMessage(achievement['category'] as String),
+                        getMotivationalMessage(category),
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w600,
@@ -442,7 +408,7 @@ class AchievementDetailModal extends StatelessWidget {
           Positioned.fill(
             child: IgnorePointer(
               child: Center(
-                child: Text('🎊', style: TextStyle(fontSize: 60)),
+                child: const Text('🎊', style: TextStyle(fontSize: 60)),
               ),
             ),
           ),

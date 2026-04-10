@@ -280,11 +280,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void _showSettings(BuildContext context) {
-    Navigator.pushNamed(context, '/settings');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Settings coming soon...')),
+    );
   }
 
   void _editProfile(BuildContext context) {
-    Navigator.pushNamed(context, '/edit-profile');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Edit profile coming soon...')),
+    );
   }
 
   void _showProfileMenu(BuildContext context) {
@@ -346,11 +350,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   void _searchFriends(BuildContext context) {
-    Navigator.pushNamed(context, '/search-friends');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Search friends coming soon...')),
+    );
   }
 
   void _addFriends(BuildContext context) {
-    Navigator.pushNamed(context, '/add-friends');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Add friends coming soon...')),
+    );
   }
 
   @override

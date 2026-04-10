@@ -896,7 +896,9 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   void _exportUserData() {
-    // No error or info message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Data export coming soon...')),
+    );
   }
 
   void _showUnitsOptions() {

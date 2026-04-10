@@ -77,6 +77,14 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
 				Navigator.pushReplacementNamed(context, '/home-dashboard');
 			}
 
+	@override
+	void dispose() {
+		_usernameController.dispose();
+		_emailController.dispose();
+		_passwordController.dispose();
+		super.dispose();
+	}
+
 			@override
 			Widget build(BuildContext context) {
 				final theme = Theme.of(context);
@@ -141,7 +149,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen> {
 																		boxShadow: [
 																			if (isSelected)
 																				BoxShadow(
-																					color: theme.colorScheme.primary.withOpacity(0.2),
+																					color: theme.colorScheme.primary.withValues(alpha: 0.2),
 																					blurRadius: 12,
 																					spreadRadius: 2,
 																				),

@@ -30,13 +30,12 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
   final Set<int> _unlockedStarterAchievements = {};
   final String _questTitle = 'Walk 500 Steps';
   final String _questDescription = 'Take 500 steps today to complete your daily quest!';
-  final bool _questCompleted = false;
-  final String _userName = '';
+  bool _questCompleted = false;
+  String _userName = '';
   int _userXP = 0;
-  final int _userLevel = 1;
+  int _userLevel = 1;
   int _currentSteps = 0;
-  final int _initialSteps = 0;
-  final int _goalSteps = 10000;
+  int _goalSteps = 10000;
   int _energyPoints = 0;
   double _distance = 0.0;
   double _calories = 0.0;
@@ -97,7 +96,22 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
     }
 
     void _checkLevelUp() {
-      // Level up logic placeholder
+      final newLevel = (_userXP / 500).floor() + 1;
+      if (newLevel > _userLevel) {
+        _userLevel = newLevel;
+      }
+    }
+
+    Future<void> _loadUserData() async {
+      final prefs = await SharedPreferences.getInstance();
+      if (mounted) {
+        setState(() {
+          _userName = prefs.getString('user_username') ?? '';
+          _goalSteps = prefs.getInt('goalSteps') ?? 10000;
+          _userLevel = prefs.getInt('user_level') ?? 1;
+          _userXP = prefs.getInt('user_xp') ?? 0;
+        });
+      }
     }
 
     void _checkAndUnlockStarterAchievements() {
@@ -132,9 +146,9 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
     Future<void> _saveSteps() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setInt('currentSteps', _currentSteps);
-      await prefs.setInt('initialSteps', _initialSteps);
       await prefs.setInt('user_level', _userLevel);
       await prefs.setInt('user_xp', _userXP);
+      await prefs.setInt('goalSteps', _goalSteps);
     }
 
     // --- Confetti Celebration Widget ---
@@ -155,7 +169,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                 width: size * (0.3 + random.nextDouble() * 0.7),
                 height: size * (0.3 + random.nextDouble() * 0.7),
                 decoration: BoxDecoration(
-                  color: c.withOpacity(0.7),
+                  color: c.withValues(alpha: 0.7),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -181,7 +195,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.shadowColor.withOpacity(0.2),
+                    color: theme.shadowColor.withValues(alpha: 0.2),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -235,7 +249,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.shadowColor.withOpacity(0.2),
+                    color: theme.shadowColor.withValues(alpha: 0.2),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
@@ -300,7 +314,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                 width: 12.w,
                 height: 0.5.h,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -343,6 +357,10 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         onTap: () {
           if (!isCurrentGoal) {
             HapticFeedback.lightImpact();
+            setState(() {
+              _goalSteps = goalValue;
+            });
+            _saveSteps();
             Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -361,10 +379,10 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
           decoration: BoxDecoration(
             color: isCurrentGoal
                 ? theme.colorScheme.primary
-                : theme.colorScheme.primary.withOpacity(0.1),
+                : theme.colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: theme.colorScheme.primary.withOpacity(0.3),
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
             ),
           ),
           child: Text(
@@ -415,6 +433,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
     Future<void> _initPedometer() async {
       await _pedometer.init();
       _loadWeather();
+      _loadUserData();
 
       // Set initial value from service.
       _updateStepsFromService(_pedometer.todaySteps);
@@ -436,6 +455,9 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         _distance = _currentSteps * 0.0005;
         _calories = _currentSteps * 0.04;
         _activeTime = _currentSteps * 0.01;
+        if (!_questCompleted && _currentSteps >= 500) {
+          _questCompleted = true;
+        }
       });
       _saveSteps();
       _checkAndUnlockStarterAchievements();

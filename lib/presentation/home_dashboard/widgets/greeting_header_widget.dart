@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/app_export.dart';
-import '../../../widgets/custom_icon_widget.dart';
 
 class GreetingHeaderWidget extends StatelessWidget {
   final String userName;
@@ -88,7 +87,7 @@ class GreetingHeaderWidget extends StatelessWidget {
                     SizedBox(width: 2.w),
                     Text(
                       temperatureF != null
-                          ? '$weatherCondition ${temperatureF}°F'
+                          ? '$weatherCondition $temperatureF°F'
                           : weatherCondition,
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w500,
