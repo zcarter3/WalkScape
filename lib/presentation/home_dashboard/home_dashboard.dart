@@ -27,7 +27,6 @@ class HomeDashboard extends StatefulWidget {
 
 class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateMixin {
   // --- Fields ---
-  final Set<int> _unlockedStarterAchievements = {};
   final String _questTitle = 'Walk 500 Steps';
   final String _questDescription = 'Take 500 steps today to complete your daily quest!';
   bool _questCompleted = false;
@@ -136,8 +135,9 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         },
       ];
       for (final ach in starterAchievements) {
-        if (_currentSteps >= ach['steps'] && !_unlockedStarterAchievements.contains(ach['id'])) {
-          _unlockedStarterAchievements.add(ach['id']);
+        final id = ach['id'] as int;
+        if (_currentSteps >= ach['steps'] && !_pedometer.isAchievementUnlocked(id)) {
+          _pedometer.unlockAchievement(id);
           _showAchievementNotification(ach['title'], ach['message']);
         }
       }
@@ -145,7 +145,6 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
 
     Future<void> _saveSteps() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('currentSteps', _currentSteps);
       await prefs.setInt('user_level', _userLevel);
       await prefs.setInt('user_xp', _userXP);
       await prefs.setInt('goalSteps', _goalSteps);
@@ -497,6 +496,41 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
+                // Permission denied banner
+                if (_pedometer.permissionDenied && !kIsWeb)
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.sensors_off,
+                            color: theme.colorScheme.onErrorContainer, size: 6.w),
+                        SizedBox(width: 3.w),
+                        Expanded(
+                          child: Text(
+                            'Step sensor permission denied. Tap to enable.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onErrorContainer,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            await _pedometer.retryPermission();
+                            if (mounted) setState(() {});
+                          },
+                          child: Text('Enable',
+                              style: TextStyle(
+                                  color: theme.colorScheme.onErrorContainer,
+                                  fontWeight: FontWeight.w600)),
+                        ),
+                      ],
+                    ),
+                  ),
                 // Daily Quest Widget
                 DailyQuestWidget(
                   questTitle: _questTitle,

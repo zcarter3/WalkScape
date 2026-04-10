@@ -263,9 +263,6 @@ class _StepEntryModalWidgetState extends State<StepEntryModalWidget>
       _isLoading = true;
     });
 
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 800));
-
     final steps = int.parse(_stepsController.text);
 
     // Add haptic feedback

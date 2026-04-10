@@ -20,6 +20,8 @@ class PedometerService {
   static const String _keyBaselineDate = 'pedometer_baseline_date';
   static const String _keyTodaySteps = 'pedometer_today_steps';
   static const String _keyManualSteps = 'pedometer_manual_steps';
+  static const String _keyStepHistory = 'pedometer_step_history';
+  static const String _keyUnlockedAchievements = 'pedometer_unlocked_achievements';
 
   StreamSubscription<StepCount>? _subscription;
   final StreamController<int> _stepsController =
@@ -27,6 +29,10 @@ class PedometerService {
 
   /// Broadcast stream of today's step count (hardware + manual).
   Stream<int> get stepsStream => _stepsController.stream;
+
+  /// Whether the permission was denied (so UI can show a prompt).
+  bool _permissionDenied = false;
+  bool get permissionDenied => _permissionDenied;
 
   int _baseline = 0;
   int _todaySteps = 0;
@@ -37,12 +43,22 @@ class PedometerService {
   bool get sensorAvailable => _sensorAvailable;
   int get todaySteps => _todaySteps + _manualSteps;
 
+  /// Set of unlocked achievement IDs (persisted).
+  final Set<int> _unlockedAchievements = {};
+  Set<int> get unlockedAchievements => Set.unmodifiable(_unlockedAchievements);
+
   /// Initialise the service — call once at app start.
   Future<void> init() async {
     if (_initialised) return;
     _initialised = true;
 
     final prefs = await SharedPreferences.getInstance();
+
+    // Restore persisted unlocked achievements.
+    final savedAchievements = prefs.getStringList(_keyUnlockedAchievements);
+    if (savedAchievements != null) {
+      _unlockedAchievements.addAll(savedAchievements.map(int.parse));
+    }
 
     // Restore persisted manual steps for today.
     final storedDate = prefs.getString(_keyBaselineDate) ?? '';
@@ -53,7 +69,12 @@ class PedometerService {
       _todaySteps = prefs.getInt(_keyTodaySteps) ?? 0;
       _manualSteps = prefs.getInt(_keyManualSteps) ?? 0;
     } else {
-      // New day — reset.
+      // New day — archive yesterday's steps before resetting.
+      final yesterdaySteps = prefs.getInt(_keyTodaySteps) ?? 0;
+      final yesterdayManual = prefs.getInt(_keyManualSteps) ?? 0;
+      if (storedDate.isNotEmpty && (yesterdaySteps + yesterdayManual) > 0) {
+        _archiveDaySteps(prefs, storedDate, yesterdaySteps + yesterdayManual);
+      }
       _baseline = 0;
       _todaySteps = 0;
       _manualSteps = 0;
@@ -74,10 +95,14 @@ class PedometerService {
     final status = await Permission.activityRecognition.request();
     if (!status.isGranted) {
       debugPrint('PedometerService: activity recognition permission denied');
+      _permissionDenied = true;
+      _sensorAvailable = false;
       return;
     }
+    _permissionDenied = false;
 
     try {
+      _subscription?.cancel();
       _subscription = Pedometer.stepCountStream.listen(
         (StepCount event) => _onStepCount(event, prefs),
         onError: (error) {
@@ -99,6 +124,13 @@ class PedometerService {
     final storedDate = prefs.getString(_keyBaselineDate) ?? '';
 
     if (storedDate != today || _baseline == 0) {
+      // Day changed — archive the old day's steps first.
+      if (storedDate.isNotEmpty && storedDate != today) {
+        final oldSteps = _todaySteps + _manualSteps;
+        if (oldSteps > 0) {
+          _archiveDaySteps(prefs, storedDate, oldSteps);
+        }
+      }
       // First reading of the day — set baseline.
       _baseline = raw;
       _todaySteps = 0;
@@ -133,10 +165,73 @@ class PedometerService {
     _stepsController.add(todaySteps);
   }
 
+  /// Mark an achievement as unlocked and persist.
+  Future<void> unlockAchievement(int id) async {
+    if (_unlockedAchievements.contains(id)) return;
+    _unlockedAchievements.add(id);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      _keyUnlockedAchievements,
+      _unlockedAchievements.map((e) => e.toString()).toList(),
+    );
+  }
+
+  bool isAchievementUnlocked(int id) => _unlockedAchievements.contains(id);
+
+  /// Archive a day's total steps into stored history.
+  void _archiveDaySteps(SharedPreferences prefs, String dateKey, int totalSteps) {
+    final history = prefs.getStringList(_keyStepHistory) ?? [];
+    // Store as "date:steps" entries, keep last 90 days.
+    history.add('$dateKey:$totalSteps');
+    if (history.length > 90) {
+      history.removeRange(0, history.length - 90);
+    }
+    prefs.setStringList(_keyStepHistory, history);
+  }
+
+  /// Retrieve step history as a map of date -> steps.
+  Future<Map<String, int>> getStepHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final history = prefs.getStringList(_keyStepHistory) ?? [];
+    final result = <String, int>{};
+    for (final entry in history) {
+      final parts = entry.split(':');
+      if (parts.length == 2) {
+        result[parts[0]] = int.tryParse(parts[1]) ?? 0;
+      }
+    }
+    return result;
+  }
+
   /// Force a re-read from persisted state (e.g. after returning from background).
   Future<void> refresh() async {
-    // Simply re-emit the current value — the hardware stream is already live.
+    final prefs = await SharedPreferences.getInstance();
+    final storedDate = prefs.getString(_keyBaselineDate) ?? '';
+    final today = _dateKey(DateTime.now());
+
+    // Handle day rollover on refresh.
+    if (storedDate != today && storedDate.isNotEmpty) {
+      final oldSteps = _todaySteps + _manualSteps;
+      if (oldSteps > 0) {
+        _archiveDaySteps(prefs, storedDate, oldSteps);
+      }
+      _baseline = 0;
+      _todaySteps = 0;
+      _manualSteps = 0;
+      prefs.setString(_keyBaselineDate, today);
+      prefs.setInt(_keyTodaySteps, 0);
+      prefs.setInt(_keyManualSteps, 0);
+      prefs.setInt(_keyBaseline, 0);
+    }
+
     _stepsController.add(todaySteps);
+  }
+
+  /// Retry sensor initialisation after a permission denial.
+  Future<void> retryPermission() async {
+    _permissionDenied = false;
+    final prefs = await SharedPreferences.getInstance();
+    await _startListening(prefs);
   }
 
   String _dateKey(DateTime dt) =>

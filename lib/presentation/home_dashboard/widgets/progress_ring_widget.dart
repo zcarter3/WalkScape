@@ -62,6 +62,27 @@ class _ProgressRingWidgetState extends State<ProgressRingWidget>
   }
 
   @override
+  void didUpdateWidget(covariant ProgressRingWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentSteps != widget.currentSteps ||
+        oldWidget.goalSteps != widget.goalSteps) {
+      final newTarget =
+          (widget.goalSteps > 0 ? widget.currentSteps / widget.goalSteps : 0.0)
+              .clamp(0.0, 1.0);
+      _progressAnimation = Tween<double>(
+        begin: _progressAnimation.value,
+        end: newTarget,
+      ).animate(CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ));
+      _animationController
+        ..reset()
+        ..forward();
+    }
+  }
+
+  @override
   void dispose() {
     _animationController.dispose();
     _pulseController.dispose();

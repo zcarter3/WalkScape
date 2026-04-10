@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'core/app_export.dart';
 import 'core/firebase_test_seed.dart';
+import 'core/pedometer_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -23,6 +24,10 @@ void main() async {
   } catch (e) {
     debugPrint('Firebase initialization error: $e');
   }
+
+  // Initialise the pedometer service early so steps are tracked
+  // even before the dashboard is opened.
+  await PedometerService.instance.init();
 
   final prefs = await SharedPreferences.getInstance();
   final profileCreated = prefs.getBool('profile_created') ?? false;
