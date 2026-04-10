@@ -1,27 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'core/app_export.dart';
 import 'core/firebase_test_seed.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  // DEV ONLY: Seed test profiles (comment out in prod)
-  await seedTestProfiles();
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    // DEV ONLY: Seed test profiles (comment out in prod)
+    await seedTestProfiles();
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
+  }
 
   final prefs = await SharedPreferences.getInstance();
   final profileCreated = prefs.getBool('profile_created') ?? false;
   final initialRoute = profileCreated ? homeDashboard : loginScreen;
 
-  Future.wait([
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-  ]).then((value) {
-    runApp(MyApp(initialRoute: initialRoute));
-  });
+  if (!kIsWeb) {
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  }
+  runApp(MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {
