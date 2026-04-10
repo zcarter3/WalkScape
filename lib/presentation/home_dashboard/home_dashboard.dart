@@ -26,20 +26,20 @@ class HomeDashboard extends StatefulWidget {
 class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateMixin {
   // --- Fields ---
   final Set<int> _unlockedStarterAchievements = {};
-  String _questTitle = 'Walk 500 Steps';
-  String _questDescription = 'Take 500 steps today to complete your daily quest!';
-  bool _questCompleted = false;
-  String _userName = '';
+  final String _questTitle = 'Walk 500 Steps';
+  final String _questDescription = 'Take 500 steps today to complete your daily quest!';
+  final bool _questCompleted = false;
+  final String _userName = '';
   int _userXP = 0;
-  int _userLevel = 1;
+  final int _userLevel = 1;
   int _currentSteps = 0;
-  int _initialSteps = 0;
-  int _goalSteps = 10000;
+  final int _initialSteps = 0;
+  final int _goalSteps = 10000;
   int _energyPoints = 0;
   double _distance = 0.0;
   double _calories = 0.0;
   double _activeTime = 0.0;
-  bool _healthPermissionsAvailable = false;
+  final bool _healthPermissionsAvailable = false;
   final List<Map<String, dynamic>> _todayAchievements = [];
   AnimationController? _fabAnimationController;
   Animation<double>? _fabAnimation;
