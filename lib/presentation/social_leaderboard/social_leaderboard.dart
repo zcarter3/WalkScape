@@ -367,7 +367,7 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
               ),
             ),
             Expanded(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: EdgeInsets.all(4.w),
                 child: Column(
                   children: [
@@ -496,70 +496,72 @@ class _SocialLeaderboardState extends State<SocialLeaderboard>
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(4.w),
-              child: Column(
-                children: [
-                  Text(
-                    'Add Friends',
-                    style: GoogleFonts.poppins(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.lightTheme.colorScheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search by username or email',
-                      prefixIcon: CustomIconWidget(
-                        iconName: 'search',
-                        color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                        size: 20,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(4.w),
+                child: Column(
+                  children: [
+                    Text(
+                      'Add Friends',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.lightTheme.colorScheme.onSurface,
                       ),
                     ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Opening contacts...')),
-                            );
-                          },
-                          icon: CustomIconWidget(
-                            iconName: 'contacts',
-                            color: AppTheme.lightTheme.colorScheme.primary,
-                            size: 18,
-                          ),
-                          label: const Text('From Contacts'),
+                    SizedBox(height: 4.h),
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search by username or email',
+                        prefixIcon: CustomIconWidget(
+                          iconName: 'search',
+                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
+                          size: 20,
                         ),
                       ),
-                      SizedBox(width: 4.w),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Sharing invite link...')),
-                            );
-                          },
-                          icon: CustomIconWidget(
-                            iconName: 'share',
-                            color: AppTheme.lightTheme.colorScheme.primary,
-                            size: 18,
+                    ),
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Opening contacts...')),
+                              );
+                            },
+                            icon: CustomIconWidget(
+                              iconName: 'contacts',
+                              color: AppTheme.lightTheme.colorScheme.primary,
+                              size: 18,
+                            ),
+                            label: const Text('From Contacts'),
                           ),
-                          label: const Text('Invite'),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        SizedBox(width: 4.w),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Sharing invite link...')),
+                              );
+                            },
+                            icon: CustomIconWidget(
+                              iconName: 'share',
+                              color: AppTheme.lightTheme.colorScheme.primary,
+                              size: 18,
+                            ),
+                            label: const Text('Invite'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

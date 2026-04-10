@@ -275,10 +275,9 @@ class AchievementDetailModal extends StatelessWidget {
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  CustomIconWidget(
-                                    iconName: 'lock_outline',
-                                    size: 15.w,
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                                  Text(
+                                    '🔒',
+                                    style: TextStyle(fontSize: 15.w * 0.4),
                                   ),
                                   SizedBox(height: 1.h),
                                   Text(

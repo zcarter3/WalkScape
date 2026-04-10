@@ -8,6 +8,7 @@ import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_export.dart';
 import '../../core/pedometer_service.dart';
+import '../../core/weather_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import './widgets/achievements_card_widget.dart';
@@ -47,6 +48,10 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
   final PedometerService _pedometer = PedometerService.instance;
+  final WeatherService _weather = WeatherService.instance;
+  String _weatherCondition = '';
+  String _weatherCity = '';
+  int _weatherTempF = 0;
 
   // --- Utility Methods ---
   String _formatCurrentDate() {
@@ -62,19 +67,23 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
     }
 
     String _getCurrentWeather() {
-      final hour = DateTime.now().hour;
-      if (hour >= 6 && hour < 12) {
-        return 'Sunny';
-      } else if (hour >= 12 && hour < 18) {
-        return 'Cloudy';
-      } else {
-        return 'Clear';
+      return _weatherCondition.isEmpty ? 'Loading...' : _weatherCondition;
+    }
+
+    Future<void> _loadWeather() async {
+      await _weather.refresh();
+      if (mounted) {
+        setState(() {
+          _weatherCondition = _weather.condition;
+          _weatherCity = _weather.city;
+          _weatherTempF = _weather.tempF;
+        });
       }
     }
 
     Future<void> _refreshHealthData() async {
       HapticFeedback.mediumImpact();
-      await _pedometer.refresh();
+      await Future.wait([_pedometer.refresh(), _loadWeather()]);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -405,6 +414,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
 
     Future<void> _initPedometer() async {
       await _pedometer.init();
+      _loadWeather();
 
       // Set initial value from service.
       _updateStepsFromService(_pedometer.todaySteps);
@@ -489,6 +499,8 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                   userName: _userName,
                   currentDate: currentDate,
                   weatherCondition: weatherCondition,
+                  temperatureF: _weatherTempF != 0 ? _weatherTempF : null,
+                  city: _weatherCity.isNotEmpty ? _weatherCity : null,
                 ),
                 SizedBox(height: 2.h),
                 ProgressRingWidget(

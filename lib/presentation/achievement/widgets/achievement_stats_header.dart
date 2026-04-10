@@ -19,9 +19,6 @@ class AchievementStatsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final completionPercentage = totalAchievements > 0
-        ? (earnedAchievements / totalAchievements * 100).round()
-        : 0;
 
     return Container(
       margin: EdgeInsets.all(4.w),
@@ -46,14 +43,10 @@ class AchievementStatsHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CustomIconWidget(
-                iconName: 'emoji_events',
-                size: 6.w,
-                color: theme.colorScheme.primary,
-              ),
+              Text('🏆', style: TextStyle(fontSize: 6.w)),
               SizedBox(width: 2.w),
               Text(
-                'Achievement Progress',
+                'Trophy Collection',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: theme.colorScheme.primary,
@@ -62,48 +55,7 @@ class AchievementStatsHeader extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: 3.h),
-
-          // Progress Circle
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 25.w,
-                height: 25.w,
-                child: CircularProgressIndicator(
-                  value: totalAchievements > 0
-                      ? earnedAchievements / totalAchievements
-                      : 0.0,
-                  strokeWidth: 1.w,
-                  backgroundColor:
-                      theme.colorScheme.outline.withValues(alpha: 0.2),
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
-                ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '$completionPercentage%',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  Text(
-                    'Complete',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          SizedBox(height: 3.h),
+          SizedBox(height: 2.h),
 
           // Stats Row
           Row(

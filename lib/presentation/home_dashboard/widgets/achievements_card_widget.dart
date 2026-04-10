@@ -39,21 +39,26 @@ class AchievementsCardWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  CustomIconWidget(
-                    iconName: 'emoji_events',
-                    color: theme.colorScheme.tertiary,
-                    size: 6.w,
-                  ),
-                  SizedBox(width: 2.w),
-                  Text(
-                    'Today\'s Achievements',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+              Expanded(
+                child: Row(
+                  children: [
+                    CustomIconWidget(
+                      iconName: 'emoji_events',
+                      color: theme.colorScheme.tertiary,
+                      size: 6.w,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 2.w),
+                    Flexible(
+                      child: Text(
+                        'Today\'s Achievements',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(

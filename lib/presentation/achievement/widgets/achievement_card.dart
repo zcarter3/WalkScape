@@ -124,11 +124,11 @@ class AchievementCard extends StatelessWidget {
                               semanticLabel:
                                   achievement['semanticLabel'] as String,
                             )
-                          : CustomIconWidget(
-                              iconName: 'lock_outline',
-                              size: 8.w,
-                                color: theme.colorScheme.onSurface
-                                  .withValues(alpha: 0.4),
+                          : Center(
+                              child: Text(
+                                '❓',
+                                style: TextStyle(fontSize: 8.w * 0.6),
+                              ),
                             ),
                     ),
                     if (!isEarned && progress > 0)
@@ -245,31 +245,33 @@ class AchievementCard extends StatelessWidget {
               child: IgnorePointer(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('🎉', style: TextStyle(fontSize: 60)),
-                    SizedBox(height: 2.h),
-                    Text(
-                      'Achievement Unlocked!',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            color: theme.colorScheme.primary.withOpacity(0.3),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    Text('🎉', style: TextStyle(fontSize: 40)),
                     SizedBox(height: 1.h),
-                    Text(
-                      getMotivationalMessage(achievement['category'] as String),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.secondary,
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Text(
+                        'Achievement Unlocked!',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      textAlign: TextAlign.center,
+                    ),
+                    Flexible(
+                      child: Text(
+                        getMotivationalMessage(achievement['category'] as String),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.secondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
