@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_export.dart';
+import '../../core/pedometer_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/custom_bottom_bar.dart';
 import './widgets/achievements_card_widget.dart';
@@ -39,13 +40,13 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
   double _distance = 0.0;
   double _calories = 0.0;
   double _activeTime = 0.0;
-  final bool _healthPermissionsAvailable = false;
   final List<Map<String, dynamic>> _todayAchievements = [];
   AnimationController? _fabAnimationController;
   Animation<double>? _fabAnimation;
-  StreamSubscription? _stepCountSubscription;
-  StreamSubscription? _connectivitySubscription;
+  StreamSubscription<int>? _stepCountSubscription;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+
+  final PedometerService _pedometer = PedometerService.instance;
 
   // --- Utility Methods ---
   String _formatCurrentDate() {
@@ -73,21 +74,8 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
 
     Future<void> _refreshHealthData() async {
       HapticFeedback.mediumImpact();
-      await Future.delayed(const Duration(milliseconds: 1500));
+      await _pedometer.refresh();
       if (mounted) {
-        setState(() {
-          int stepsIncrease = (DateTime.now().millisecond % 50);
-          _currentSteps += stepsIncrease;
-          _userXP += (stepsIncrease / 10).round();
-          _checkLevelUp();
-          _energyPoints = _currentSteps ~/ 100;
-          _distance = _currentSteps * 0.0005;
-          _calories = _currentSteps * 0.04;
-          _activeTime = _currentSteps * 0.01;
-        });
-        await _saveSteps();
-        _checkAndUnlockStarterAchievements();
-        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Health data synced successfully!'),
@@ -391,17 +379,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         isScrollControlled: true,
         builder: (context) => StepEntryModalWidget(
           onStepsAdded: (steps) async {
-            setState(() {
-              _currentSteps += steps;
-              _userXP += (steps / 10).round();
-              _checkLevelUp();
-              _energyPoints = _currentSteps ~/ 100;
-              _distance = _currentSteps * 0.0005;
-              _calories = _currentSteps * 0.04;
-              _activeTime = _currentSteps * 0.01;
-            });
-            await _saveSteps();
-            _checkAndUnlockStarterAchievements();
+            await _pedometer.addManualSteps(steps);
           },
         ),
       );
@@ -421,13 +399,42 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         curve: Curves.easeInOut,
       ));
       _fabAnimationController!.forward();
+
+      _initPedometer();
+    }
+
+    Future<void> _initPedometer() async {
+      await _pedometer.init();
+
+      // Set initial value from service.
+      _updateStepsFromService(_pedometer.todaySteps);
+
+      // Listen for real-time updates from the hardware sensor.
+      _stepCountSubscription = _pedometer.stepsStream.listen((steps) {
+        if (mounted) {
+          _updateStepsFromService(steps);
+        }
+      });
+    }
+
+    void _updateStepsFromService(int steps) {
+      setState(() {
+        _currentSteps = steps;
+        _userXP = (steps / 10).round();
+        _checkLevelUp();
+        _energyPoints = _currentSteps ~/ 100;
+        _distance = _currentSteps * 0.0005;
+        _calories = _currentSteps * 0.04;
+        _activeTime = _currentSteps * 0.01;
+      });
+      _saveSteps();
+      _checkAndUnlockStarterAchievements();
     }
 
     @override
     void dispose() {
       _fabAnimationController?.dispose();
       _stepCountSubscription?.cancel();
-      _connectivitySubscription?.cancel();
       super.dispose();
     }
 
@@ -516,7 +523,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
             ),
           ),
         ),
-        floatingActionButton: !_healthPermissionsAvailable
+        floatingActionButton: (!_pedometer.sensorAvailable || kIsWeb)
             ? AnimatedBuilder(
                 animation: _fabAnimation!,
                 builder: (context, child) {
@@ -531,7 +538,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
                         size: 6.w,
                       ),
                       label: Text(
-                        kIsWeb ? 'Add Steps (Web Mode)' : 'Add Steps (Offline Mode)',
+                        kIsWeb ? 'Add Steps (Web Mode)' : 'Add Steps',
                         style: TextStyle(
                           color:
                               theme.floatingActionButtonTheme.foregroundColor ??
