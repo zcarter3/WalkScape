@@ -239,15 +239,39 @@ class AchievementCard extends StatelessWidget {
           ),
             ),
           ),
-          // Confetti celebration overlay for newly earned achievements (example, can be improved with animation package)
+          // Confetti celebration overlay for newly earned achievements
           if (isEarned && (achievement['justUnlocked'] ?? false))
             Positioned.fill(
               child: IgnorePointer(
-                child: Center(
-                  child: Text(
-                    '🎉',
-                    style: TextStyle(fontSize: 48),
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('🎉', style: TextStyle(fontSize: 60)),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'Achievement Unlocked!',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            color: theme.colorScheme.primary.withOpacity(0.3),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 1.h),
+                    Text(
+                      getMotivationalMessage(achievement['category'] as String),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.secondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
             ),

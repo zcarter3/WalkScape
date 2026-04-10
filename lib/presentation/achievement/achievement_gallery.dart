@@ -29,7 +29,44 @@ class _AchievementGalleryState extends State<AchievementGallery>
 
   // Mock achievement data
   final List<Map<String, dynamic>> _allAchievements = [
-    // All achievements are now based on miles walked, with unique, fun, and competitive requirements
+    // Starter step achievements
+    {
+      'id': 1001,
+      'title': 'First Steps!',
+      'description': 'Take 10 steps to start your journey.',
+      'category': 'Steps',
+      'rarity': 'common',
+      'isEarned': false,
+      'badgeImage': 'https://cdn.pixabay.com/photo/2017/01/31/13/14/foot-2024634_1280.png',
+      'semanticLabel': 'Footprint with sparkles',
+      'points': 10,
+      'requirement': 'Take 10 steps',
+    },
+    {
+      'id': 1002,
+      'title': 'Getting Warmer',
+      'description': 'Take 50 steps. You’re on your way!',
+      'category': 'Steps',
+      'rarity': 'common',
+      'isEarned': false,
+      'badgeImage': 'https://cdn.pixabay.com/photo/2013/07/12/13/58/shoe-147844_1280.png',
+      'semanticLabel': 'Shoe with a warm glow',
+      'points': 25,
+      'requirement': 'Take 50 steps',
+    },
+    {
+      'id': 1003,
+      'title': 'Step Champion',
+      'description': 'Take 100 steps. You’re unstoppable!',
+      'category': 'Steps',
+      'rarity': 'rare',
+      'isEarned': false,
+      'badgeImage': 'https://cdn.pixabay.com/photo/2012/04/13/00/22/shoe-31212_1280.png',
+      'semanticLabel': 'Golden shoe with rays',
+      'points': 50,
+      'requirement': 'Take 100 steps',
+    },
+    // ...existing code...
     {
       'id': 1,
       'title': 'Mile One Magic',

@@ -25,6 +25,9 @@ class HomeDashboard extends StatefulWidget {
 }
 
 class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateMixin {
+      // Track which starter achievements have been unlocked in this session
+      final Set<int> _unlockedStarterAchievements = {};
+
     // Add missing methods to resolve errors
     void _checkLevelUp() {
       // Level up logic placeholder
@@ -69,6 +72,7 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
           _activeTime = _currentSteps * 0.01; // Changed to double
         });
         await _saveSteps();
+        _checkAndUnlockStarterAchievements();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -80,6 +84,88 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
         );
       }
     }
+
+  void _checkAndUnlockStarterAchievements() {
+    final List<Map<String, dynamic>> starterAchievements = [
+      {
+        'id': 1001,
+        'title': 'First Steps!',
+        'steps': 10,
+        'message': 'You took your first 10 steps! 🎉',
+      },
+      {
+        'id': 1002,
+        'title': 'Getting Warmer',
+        'steps': 50,
+        'message': 'You reached 50 steps! Keep going! 🏅',
+      },
+      {
+        'id': 1003,
+        'title': 'Step Champion',
+        'steps': 100,
+        'message': '100 steps! You are unstoppable! 👑',
+      },
+    ];
+    for (final ach in starterAchievements) {
+      if (_currentSteps >= ach['steps'] && !_unlockedStarterAchievements.contains(ach['id'])) {
+        _unlockedStarterAchievements.add(ach['id']);
+        _showAchievementNotification(ach['title'], ach['message']);
+      }
+    }
+  }
+
+  void _showAchievementNotification(String title, String message) {
+    final theme = Theme.of(context);
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(6.w),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.shadowColor.withOpacity(0.2),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('🎉', style: TextStyle(fontSize: 48)),
+                SizedBox(height: 2.h),
+                Text(
+                  title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 1.h),
+                Text(
+                  message,
+                  style: theme.textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 2.h),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Awesome!'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   final String _userName = '';
   int _userXP = 0;
@@ -369,10 +455,11 @@ class _HomeDashboardState extends State<HomeDashboard> with TickerProviderStateM
             _checkLevelUp();
             _energyPoints = _currentSteps ~/ 100;
             _distance = _currentSteps * 0.0005;
-              _calories = _currentSteps * 0.04; // Changed to double
-              _activeTime = _currentSteps * 0.01; // Changed to double
+            _calories = _currentSteps * 0.04; // Changed to double
+            _activeTime = _currentSteps * 0.01; // Changed to double
           });
           await _saveSteps();
+          _checkAndUnlockStarterAchievements();
         },
       ),
     );
